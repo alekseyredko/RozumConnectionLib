@@ -229,7 +229,7 @@ namespace RozumConnectionLib
             }            
         }
 
-        public async Task<HttpResponseMessage> PutPosition(double[] position, int speed)
+        public async Task<HttpResponseMessage> PutPosition(double[] position, int value, RobotMoveMode mode)
         {
             try
             {
@@ -245,7 +245,11 @@ namespace RozumConnectionLib
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(dict),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"position?speed={speed}", httpContent); 
+                if (mode == RobotMoveMode.SPEED)
+                {
+                    return await client.PutAsync(URL + $"position?speed={value}", httpContent);
+                }
+                else return await client.PutAsync(URL + $"position?time={value}", httpContent);
             }
             catch (IndexOutOfRangeException)
             {
@@ -273,7 +277,7 @@ namespace RozumConnectionLib
             }            
         }
 
-        public async Task<HttpResponseMessage> PutPose(double[] coordinates, int speed)
+        public async Task<HttpResponseMessage> PutPose(double[] coordinates, int value, RobotMoveMode mode)
         {
             try
             {
@@ -282,7 +286,11 @@ namespace RozumConnectionLib
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(dict),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"pose?speed={speed}", httpContent);
+                if (mode == RobotMoveMode.SPEED)
+                {
+                    return await client.PutAsync(URL + $"pose?speed={value}", httpContent);
+                }
+                else return await client.PutAsync(URL + $"pose?time={value}", httpContent);
             }
             catch (HttpRequestException)
             {
@@ -338,7 +346,7 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> RunPoses(double[][] angles, int speed)
+        public async Task<HttpResponseMessage> RunPoses(double[][] angles, int value, RobotMoveMode mode)
         {
             try
             {                
@@ -353,7 +361,11 @@ namespace RozumConnectionLib
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(dict),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"poses/run?speed={speed}", httpContent);
+                if (mode == RobotMoveMode.SPEED)
+                {
+                    return await client.PutAsync(URL + $"poses/run?speed={value}", httpContent);
+                }
+                else return await client.PutAsync(URL + $"poses/run?time={value}", httpContent);
             }
             catch(IndexOutOfRangeException)
             {
@@ -365,7 +377,7 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> RunPositions(double[][] angles, int speed)
+        public async Task<HttpResponseMessage> RunPositions(double[][] angles, int value, RobotMoveMode mode)
         {
             try
             {
@@ -387,7 +399,11 @@ namespace RozumConnectionLib
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(dict),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"positions/run?speed={speed}", httpContent);
+                if (mode == RobotMoveMode.SPEED)
+                {
+                    return await client.PutAsync(URL + $"positions/run?speed={value}", httpContent);
+                }
+                else return await client.PutAsync(URL + $"positions/run?time={value}", httpContent);
             }
             catch(IndexOutOfRangeException)
             {

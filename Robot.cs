@@ -12,8 +12,8 @@ namespace RozumConnectionLib
         public RobotPosition Position { get; set; }
         public abstract Task<string> GetPositionAsync();
         public abstract Task<string> GetJointAnglesAsync();
-        public abstract Task<string> SetPositionAsync(double[] position, int speed);
-        public abstract Task<string> SetJointAnglesAsync(double[] angles, int speed);
+        public abstract Task<string> SetPositionAsync(double[] position, int value, RobotMoveMode mode = RobotMoveMode.SPEED);
+        public abstract Task<string> SetJointAnglesAsync(double[] angles, int value, RobotMoveMode mode = RobotMoveMode.SPEED);
     }
 
     public class RobotPosition: INotifyPropertyChanged
@@ -96,6 +96,11 @@ namespace RozumConnectionLib
     public enum RobotStatusMotion
     {
         IDLE, RUNNING, ZERO_GRAVITY, NOT_RESPOND
+    }
+
+    public enum RobotMoveMode
+    {
+        SPEED, TIME
     }
 
     public enum RobotMode

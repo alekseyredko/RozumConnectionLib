@@ -210,12 +210,12 @@ namespace RozumConnectionLib
             }   
         }
 
-        public override async Task<string> SetJointAnglesAsync(double[] angles, int speed)
+        public override async Task<string> SetJointAnglesAsync(double[] angles, int value, RobotMoveMode mode = RobotMoveMode.SPEED)
         {     
             HttpResponseMessage response;
             if (IsConnected)
             {
-                response = await connection.PutPose(angles, speed);
+                response = await connection.PutPose(angles, value, mode);
             }
             else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
@@ -234,12 +234,12 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> SetJointAnglesAsync(int speed)
+        public async Task<string> SetJointAnglesAsync(int value, RobotMoveMode mode = RobotMoveMode.SPEED)
         {
             HttpResponseMessage response;
             if (IsConnected)
             {
-                response = await connection.PutPose(JointAngles, speed);
+                response = await connection.PutPose(JointAngles, value ,mode);
             }
             else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
            
@@ -257,12 +257,12 @@ namespace RozumConnectionLib
             }
         }
 
-        public override async Task<string> SetPositionAsync(double[] position, int speed)
+        public override async Task<string> SetPositionAsync(double[] position, int value, RobotMoveMode mode = RobotMoveMode.SPEED)
         {
             HttpResponseMessage response;
             if (IsConnected)
             {
-                response = await connection.PutPosition(position, speed);
+                response = await connection.PutPosition(position, value, mode);
             }
             response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
            
@@ -281,12 +281,12 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> SetPositionAsync(int speed)
+        public async Task<string> SetPositionAsync(int value, RobotMoveMode mode = RobotMoveMode.SPEED)
         {
             HttpResponseMessage response;
             if (IsConnected)
-            {
-                response = await connection.PutPosition(Position.ToArray(), speed);
+            {                
+                response = await connection.PutPosition(Position.ToArray(), value, mode);
             }
             else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
@@ -295,6 +295,54 @@ namespace RozumConnectionLib
                 return "OK";
             }
             else if(response.StatusCode == HttpStatusCode.PreconditionFailed)
+            {
+                return await response.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                return "Robot does not respond";
+            }
+        }
+
+        public async Task<string> SetPositionsAsync(double[][] positions, int value, RobotMoveMode mode = RobotMoveMode.SPEED)
+        {
+            HttpResponseMessage response;
+            if (IsConnected)
+            {
+                response = await connection.RunPositions(positions, value, mode);
+            }
+            response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                Position.Array = positions.Last();
+                return "OK";
+            }
+            else if (response.StatusCode == HttpStatusCode.PreconditionFailed)
+            {
+                return await response.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                return "Robot does not respond";
+            }
+        }
+
+        public async Task<string> SetPosesAsync(double[][] angles, int value, RobotMoveMode mode = RobotMoveMode.SPEED)
+        {
+            HttpResponseMessage response;
+            if (IsConnected)
+            {
+                response = await connection.RunPoses(angles, value, mode);
+            }
+            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                JointAngles = angles.Last();
+                return "OK";
+            }
+            else if (response.StatusCode == HttpStatusCode.PreconditionFailed)
             {
                 return await response.Content.ReadAsStringAsync();
             }
