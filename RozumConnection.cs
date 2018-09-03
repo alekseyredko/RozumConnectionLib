@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace RozumConnectionLib
 {    
-    public class RozumConnection
+    class RozumConnection
     {               
         public string URL { get; set; }
         private readonly HttpClient client = new HttpClient();

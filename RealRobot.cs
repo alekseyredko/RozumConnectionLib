@@ -42,6 +42,7 @@ namespace RozumConnectionLib
 
         public RealRobot(string url)
         {
+            Status = RobotStatusMotion.NOT_RESPOND;
             InitConnection(url);
             
             JointAngles = new double[6];           
@@ -51,39 +52,50 @@ namespace RozumConnectionLib
         
         public RealRobot()
         {
+            Status = RobotStatusMotion.NOT_RESPOND;
             IsConnected = false;
+            URL="http://0.0.0.0:0/";
             
             JointAngles = new double[6];
             Position = new RobotPosition();
             MotorStatus = new RobotMotorStatus();                        
         }
         
-        private void InitConnection(string url)
+        private void InitConnection(string ip)
         {
-            if (IPAddress.TryParse(url.Split(':')[0], out IPAddress iP))
+            if (IPAddress.TryParse(ip, out IPAddress iP))
             {
-                connection = new RozumConnection($"http://{url}/");
-                IsConnected = true;
+                connection = new RozumConnection($"http://{ip}:8081/");
+                GetStatusMotionAsync().Wait();
+                if (Status != RobotStatusMotion.NOT_RESPOND)
+                {
+                    IsConnected = true;
+                } 
+                else IsConnected = false;
             }
             else IsConnected = false;
         }
 
-        public async Task<string> SetMode(RobotMode mode)
+        public async Task<string> SetModeAsync(RobotMode mode)
         {
             HttpResponseMessage response;
-            if (mode == RobotMode.Freeze)
+            if (IsConnected)
             {
-                response = await connection.SetFreezeMode();
-                Mode = RobotMode.Freeze;
+                if (mode == RobotMode.Freeze)
+                {
+                    response = await connection.SetFreezeMode();
+                    Mode = RobotMode.Freeze;
+                }
+                else
+                {
+                    response = await connection.SetRelaxMode();
+                    Mode = RobotMode.Relax;
+                }
             }
-            else
-            {
-                response = await connection.SetRelaxMode();
-                Mode = RobotMode.Relax;
-            }
+            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);            
+
             if (response.StatusCode == HttpStatusCode.OK)
-            {
-                RaisePropertyChanged("Mode");
+            {                
                 return "OK";
             }
             else
@@ -92,38 +104,46 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> GetStatusMotion()
-        {
-            //var response = await connection.GetStatusMotionStr();            
-            var response = await new HttpClient().GetAsync(URL + "status/motion").Result.Content.ReadAsStringAsync();
+        public async Task<string> GetStatusMotionAsync()
+        {                       
+            string response;
+            if (IsConnected)
+            {
+                response = await connection.GetStatusMotionStr();
+            }
+            else response = "";
 
             if (response == "\"IDLE\"")
-            {
-                RaisePropertyChanged("StatusMotion");
+            {                
                 Status = RobotStatusMotion.IDLE;
                 return "IDLE";
             }
             else if (response == "\"RUNNING\"")
-            {
-                RaisePropertyChanged("StatusMotion");
+            {               
                 Status = RobotStatusMotion.RUNNING;
                 return "RUNNING";
             }
             else if (response == "\"ZERO_GRAVITY\"")
-            {
-                RaisePropertyChanged("StatusMotion");
+            {               
                 Status = RobotStatusMotion.ZERO_GRAVITY;
                 return "ZERO_GRAVITY";
             }
             else
-            {                              
+            {     
+                Status = RobotStatusMotion.NOT_RESPOND;
                 return "Robot does not respond";
             }    
         }
 
-        public async Task<string> GetMotorStatus()
+        public async Task<string> GetMotorStatusAsync()
         {
-            var response = await connection.GetMotorStatus();            
+            HttpResponseMessage response;
+            if (IsConnected)
+            {
+                response = await connection.GetMotorStatus();
+            }
+            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 var content = await response.Content.ReadAsStringAsync();                
@@ -136,21 +156,24 @@ namespace RozumConnectionLib
                 {
                     MotorStatus.Amperage[i] = dicts[i]["current"];
                     MotorStatus.Temperature[i] = dicts[i]["temperature"];
-                }
-                RaisePropertyChanged("MotorStatus");
+                }               
                 return "OK";
             }
             else
-            {
-                IsConnected = false;                
+            {                         
                 return "Robot does not respond";
             }           
         }
-
-        //TODO: оповещать ViewModel
-        public override async Task<string> GetJointAngles()
+        
+        public override async Task<string> GetJointAnglesAsync()
         {
-            var response = await connection.GetPose();            
+            HttpResponseMessage response;
+            if (IsConnected)
+            {
+                response = await connection.GetPose();
+            } 
+            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 var content = await response.Content.ReadAsStringAsync();
@@ -160,15 +183,20 @@ namespace RozumConnectionLib
                 return "OK";
             }
             else
-            {                                                         
-                IsConnected = false;                
+            {                                                                        
                 return "Robot does not respond";
             }           
         }
 
-        public override async Task<string> GetPosition()
+        public override async Task<string> GetPositionAsync()
         {
-            var response = await connection.GetPosition();
+            HttpResponseMessage response;
+            if (IsConnected)
+            {
+                response = await connection.GetPosition();
+            }            
+            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 var array = await connection.GetPositionArray();                
@@ -177,18 +205,23 @@ namespace RozumConnectionLib
                 return "OK";
             }
             else
-            {
-                IsConnected = false;                
+            {                             
                 return "Robot does not respond";
             }   
         }
 
-        public override async Task<string> SetJointAngles(double[] angles, int speed)
-        {        
-            var response = await connection.PutPose(angles, speed);
+        public override async Task<string> SetJointAnglesAsync(double[] angles, int speed)
+        {     
+            HttpResponseMessage response;
+            if (IsConnected)
+            {
+                response = await connection.PutPose(angles, speed);
+            }
+            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
             if (response.StatusCode == HttpStatusCode.OK)
-            {
-                IsConnected = true;
+            {                
+                JointAngles = angles;
                 return "OK";
             }
             else if(response.StatusCode == HttpStatusCode.PreconditionFailed)
@@ -197,17 +230,21 @@ namespace RozumConnectionLib
             }
             else
             {
-                IsConnected = false;
-                return await response.Content.ReadAsStringAsync();
+                return "Robot does not respond";
             }
         }
 
-        public async Task<string> SetJointAngles(int speed)
+        public async Task<string> SetJointAnglesAsync(int speed)
         {
-            var response = await connection.PutPose(JointAngles, speed);
+            HttpResponseMessage response;
+            if (IsConnected)
+            {
+                response = await connection.PutPose(JointAngles, speed);
+            }
+            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+           
             if (response.StatusCode == HttpStatusCode.OK)
-            {
-                IsConnected = true;
+            {                
                 return "OK";
             }
             else if(response.StatusCode == HttpStatusCode.PreconditionFailed)
@@ -215,18 +252,23 @@ namespace RozumConnectionLib
                 return await response.Content.ReadAsStringAsync();
             }
             else
-            {
-                IsConnected = false;
-                return await response.Content.ReadAsStringAsync();
+            {               
+                return "Robot does not respond";
             }
         }
 
-        public override async Task<string> SetPosition(double[] position, int speed)
+        public override async Task<string> SetPositionAsync(double[] position, int speed)
         {
-            var response = await connection.PutPosition(position, speed);
+            HttpResponseMessage response;
+            if (IsConnected)
+            {
+                response = await connection.PutPosition(position, speed);
+            }
+            response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+           
             if(response.StatusCode == HttpStatusCode.OK)
-            {
-                IsConnected = true;
+            {      
+                Position.Array = position;
                 return "OK";
             }
             else if(response.StatusCode == HttpStatusCode.PreconditionFailed)
@@ -235,17 +277,21 @@ namespace RozumConnectionLib
             }
             else
             {
-                IsConnected = false;
-                return await response.Content.ReadAsStringAsync();
+                return "Robot does not respond";
             }
         }
 
-        public async Task<string> SetPosition(int speed)
+        public async Task<string> SetPositionAsync(int speed)
         {
-            var response = await connection.PutPosition(Position.ToArray(), speed);
+            HttpResponseMessage response;
+            if (IsConnected)
+            {
+                response = await connection.PutPosition(Position.ToArray(), speed);
+            }
+            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
             if(response.StatusCode == HttpStatusCode.OK)
-            {
-                IsConnected = true;
+            {                
                 return "OK";
             }
             else if(response.StatusCode == HttpStatusCode.PreconditionFailed)
@@ -254,14 +300,19 @@ namespace RozumConnectionLib
             }
             else
             {
-                IsConnected = false;
-                return await response.Content.ReadAsStringAsync();
+                return "Robot does not respond";
             }
         }
 
-        public async Task<string> OpenGripper()
+        public async Task<string> OpenGripperAsync()
         {
-            var response = await connection.OpenGripper();
+            HttpResponseMessage response;
+            if (IsConnected)
+            {
+                response = await connection.OpenGripper();
+            }
+            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 IsGripperOpened = true;
@@ -273,9 +324,15 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> CloseGripper()
+        public async Task<string> CloseGripperAsync()
         {
-            var response = await connection.CloseGripper();
+            HttpResponseMessage response;
+            if (IsConnected)
+            {
+                response = await connection.CloseGripper();
+            }
+            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 IsGripperOpened = false;
@@ -289,7 +346,7 @@ namespace RozumConnectionLib
 
         public void WaitMotion(int askingPeriod = 50)
         {
-            while (GetStatusMotion().Result!="IDLE")
+            while (GetStatusMotionAsync().Result!="IDLE")
             {
                 Thread.Sleep(askingPeriod);
             }

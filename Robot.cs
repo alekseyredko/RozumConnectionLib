@@ -6,45 +6,14 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 namespace RozumConnectionLib
 {
-    public abstract class Robot: INotifyPropertyChanged
-    {          
-        protected void RaisePropertyChanged(string prop)
-        {
-            if (PropertyChanged != null) { PropertyChanged(this, new PropertyChangedEventArgs(prop)); }
-        }
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private double[] _jointAngles;
-        public double[] JointAngles
-        {
-            get
-            {
-                return _jointAngles;
-            }
-            set
-            {
-                _jointAngles = value;
-                RaisePropertyChanged("JointAngles");
-            }
-        } 
-
-        private RobotPosition _position;
-        public RobotPosition Position
-        {
-            get
-            {
-                return _position;
-            }
-            set
-            {
-                _position = value;
-                RaisePropertyChanged("Position");
-            }
-        }
-        public abstract Task<string> GetPosition();
-        public abstract Task<string> GetJointAngles();
-        public abstract Task<string> SetPosition(double[] position, int speed);
-        public abstract Task<string> SetJointAngles(double[] angles, int speed);
+    public abstract class Robot
+    {
+        public double[] JointAngles { get; set; }
+        public RobotPosition Position { get; set; }
+        public abstract Task<string> GetPositionAsync();
+        public abstract Task<string> GetJointAnglesAsync();
+        public abstract Task<string> SetPositionAsync(double[] position, int speed);
+        public abstract Task<string> SetJointAnglesAsync(double[] angles, int speed);
     }
 
     public class RobotPosition: INotifyPropertyChanged
@@ -55,85 +24,12 @@ namespace RozumConnectionLib
         }
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private double _x;
-        private double _y;
-        private double _z;
-        private double _roll;
-        private double _pitch;
-        private double _yaw;
-
-        public double X 
-        { 
-            get
-            {
-                return _x;
-            }
-            set
-            {
-                RaisePropertyChanged("X"); 
-                _x = value; 
-            } 
-        }
-        public double Y
-        {
-            get
-            {
-                return _y;
-            }
-            set
-            {
-                RaisePropertyChanged("Y"); 
-                _y = value; 
-            } 
-        }
-        public double Z
-        {
-            get
-            {
-                return _z;
-            }
-            set
-            {
-                RaisePropertyChanged("Z"); 
-                _z = value; 
-            } 
-        }
-        public double Roll
-        {
-            get
-            {
-                return _roll;
-            }
-            set
-            {
-                RaisePropertyChanged("Roll"); 
-                _roll = value; 
-            } 
-        }
-        public double Pitch
-        {
-            get
-            {
-                return _pitch;
-            }
-            set
-            {
-                RaisePropertyChanged("Pitch"); 
-                _pitch = value; 
-            } 
-        }
-        public double Yaw
-        {
-            get
-            {
-                return _yaw;
-            }
-            set
-            {
-                RaisePropertyChanged("Yaw"); 
-                _yaw = value; 
-            } 
-        }
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Z { get; set; }
+        public double Roll { get; set; }
+        public double Pitch { get; set; }
+        public double Yaw { get; set; }
 
         public double[] Point
         {
@@ -185,8 +81,7 @@ namespace RozumConnectionLib
             return new double[] { X, Y, Z, Roll, Pitch, Yaw };
         }
     }
-
-    //TODO: валидация данных
+  
     public class RobotMotorStatus
     {
         public double[] Temperature{get;set;}
@@ -200,7 +95,7 @@ namespace RozumConnectionLib
 
     public enum RobotStatusMotion
     {
-        IDLE, RUNNING, ZERO_GRAVITY
+        IDLE, RUNNING, ZERO_GRAVITY, NOT_RESPOND
     }
 
     public enum RobotMode
