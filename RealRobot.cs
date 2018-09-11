@@ -210,12 +210,12 @@ namespace RozumConnectionLib
             }   
         }
 
-        public override async Task<string> SetJointAnglesAsync(double[] angles, int value, RobotMoveMode mode = RobotMoveMode.SPEED)
+        public override async Task<string> SetJointAnglesAsync(double[] angles, int value)
         {     
             HttpResponseMessage response;
             if (IsConnected)
             {
-                response = await connection.PutPose(angles, value, mode);
+                response = await connection.PutPose(angles, value);
             }
             else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
@@ -234,12 +234,12 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> SetJointAnglesAsync(int value, RobotMoveMode mode = RobotMoveMode.SPEED)
+        public async Task<string> SetJointAnglesAsync(int value)
         {
             HttpResponseMessage response;
             if (IsConnected)
             {
-                response = await connection.PutPose(JointAngles, value ,mode);
+                response = await connection.PutPose(JointAngles, value);
             }
             else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
            
@@ -257,12 +257,12 @@ namespace RozumConnectionLib
             }
         }
 
-        public override async Task<string> SetPositionAsync(double[] position, int value, RobotMoveMode mode = RobotMoveMode.SPEED)
+        public override async Task<string> SetPositionAsync(double[] position, int value)
         {
             HttpResponseMessage response;
             if (IsConnected)
             {
-                response = await connection.PutPosition(position, value, mode);
+                response = await connection.PutPosition(position, value);
             }
             response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
            
@@ -286,7 +286,7 @@ namespace RozumConnectionLib
             HttpResponseMessage response;
             if (IsConnected)
             {                
-                response = await connection.PutPosition(Position.ToArray(), value, mode);
+                response = await connection.PutPosition(Position.ToArray(), value);
             }
             else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
@@ -304,12 +304,12 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> SetPositionsAsync(double[][] positions, int value, RobotMoveMode mode = RobotMoveMode.SPEED)
+        public async Task<string> SetPositionsAsync(double[][] positions, int value)
         {
             HttpResponseMessage response;
             if (IsConnected)
             {
-                response = await connection.RunPositions(positions, value, mode);
+                response = await connection.RunPositions(positions, value);
             }
             response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
@@ -328,12 +328,12 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> SetPosesAsync(double[][] angles, int value, RobotMoveMode mode = RobotMoveMode.SPEED)
+        public async Task<string> SetPosesAsync(double[][] angles, int value)
         {
             HttpResponseMessage response;
             if (IsConnected)
             {
-                response = await connection.RunPoses(angles, value, mode);
+                response = await connection.RunPoses(angles, value);
             }
             else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
