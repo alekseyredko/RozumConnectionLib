@@ -1,79 +1,102 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace RozumConnectionLib
 {
     public class RealRobot : Robot
     {
-        private RozumConnection connection;
-        
-        public double TcpMoveStep{get;set;}
-        public double JointMoveStep{get;set;}
-        public int Speed{get;set;}
+        private RozumConnection _connection;
+
+        private string _url;
+
+        public RealRobot(string ip)
+        {
+            Status = RobotStatusMotion.ERROR;
+            InitConnection(ip);
+
+            InitValues();
+        }
+
+        public RealRobot()
+        {
+            Status = RobotStatusMotion.ERROR;
+            IsConnected = false;
+
+            InitValues();
+        }
+
+        public double TcpMoveStep { get; set; }
+        public double JointMoveStep { get; set; }
+        public int Speed { get; set; }
 
         public string URL
         {
-            get
-            {
-                return connection.URL;
-            }
+            get => $"http://{_url}:8081/";
             set
             {
+                _url = value;
                 InitConnection(value);
             }
         }
 
-        public RobotMotorStatus MotorStatus{get;protected set;}
+        public MotorStatus MotorStatus { get; protected set; }
 
-        public RobotMode Mode{get;private set;}
+        public RobotMode Mode { get; private set; }
 
-        public RobotStatusMotion Status{get;protected set;}
+        public RobotStatusMotion Status { get; protected set; }
 
-        public bool IsConnected{get;protected set;}
+        public bool IsConnected { get; protected set; }
 
-        public bool IsGripperOpened{get;protected set;}
+        public bool IsGripperOpened { get; protected set; }
 
-        public RealRobot(string url)
+        private void InitValues()
         {
-            Status = RobotStatusMotion.NOT_RESPOND;
-            InitConnection(url);
-            
-            JointAngles = new double[6];           
-            Position = new RobotPosition();
-            MotorStatus = new RobotMotorStatus();            
-        }        
-        
-        public RealRobot()
-        {
-            Status = RobotStatusMotion.NOT_RESPOND;
-            IsConnected = false;
-            URL="http://0.0.0.0:0/";
-            
+            ID = "";
+            Tool = new Gripper();
+            InputPorts = new bool[6];
+            OutputPorts = new bool[6];
             JointAngles = new double[6];
-            Position = new RobotPosition();
-            MotorStatus = new RobotMotorStatus();                        
+            Position = new Position();
+            BasePosition = new Position();
+            MotorStatus = new MotorStatus();
         }
-        
+
         private void InitConnection(string ip)
         {
-            if (IPAddress.TryParse(ip, out IPAddress iP))
+            if (IPAddress.TryParse(ip, out var iP))
             {
-                connection = new RozumConnection($"http://{ip}:8081/");
-                GetStatusMotionAsync().Wait();
-                if (Status != RobotStatusMotion.NOT_RESPOND)
-                {
-                    IsConnected = true;
-                } 
-                else IsConnected = false;
+                _connection = new RozumConnection($"http://{ip}:8081/");
+                //GetStatusMotionAsync().Wait(2000);               
+                //IsConnected = Status != RobotStatusMotion.ERROR;
+                IsConnected = true;
             }
-            else IsConnected = false;
+            else
+            {
+                _connection = new RozumConnection(URL);
+                IsConnected = false;
+            }
+        }
+
+        public async Task<string> SetDigitalOutput(int port, bool value)
+        {
+            var response = await _connection.SetDigitalOutput(port, value);
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    OutputPorts[port - 1] = value;
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
+            }
         }
 
         public async Task<string> SetModeAsync(RobotMode mode)
@@ -83,321 +106,406 @@ namespace RozumConnectionLib
             {
                 if (mode == RobotMode.Freeze)
                 {
-                    response = await connection.SetFreezeMode();
+                    response = await _connection.SetFreezeMode();
                     Mode = RobotMode.Freeze;
                 }
                 else
                 {
-                    response = await connection.SetRelaxMode();
+                    response = await _connection.SetRelaxMode();
                     Mode = RobotMode.Relax;
                 }
             }
-            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);            
-
-            if (response.StatusCode == HttpStatusCode.OK)
-            {                
-                return "OK";
-            }
             else
             {
-                return "Robot does not respond";
+                response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
             }
+
+            return response.StatusCode == HttpStatusCode.OK ? "OK" : "Robot does not respond";
         }
+
 
         public async Task<string> GetStatusMotionAsync()
-        {                       
-            string response;
-            if (IsConnected)
-            {
-                response = await connection.GetStatusMotionStr();
-            }
-            else response = "";
+        {
+            var response = await _connection.GetStatusMotionStr();            
 
-            if (response == "\"IDLE\"")
-            {                
-                Status = RobotStatusMotion.IDLE;
-                return "IDLE";
+            switch (response)
+            {
+                case "\"IDLE\"":
+                    Status = RobotStatusMotion.IDLE;
+                    return "IDLE";
+                case "\"RUNNING\"":
+                    Status = RobotStatusMotion.RUNNING;
+                    return "RUNNING";
+                case "\"ZERO_GRAVITY\"":
+                    Status = RobotStatusMotion.ZERO_GRAVITY;
+                    return "ZERO_GRAVITY";
+                case "\"MOTION_FAILED\"":
+                    Status = RobotStatusMotion.MOTION_FAILED;
+                    return "MOTION_FAILED";
+                case "\"EMERGENCY\"":
+                    Status = RobotStatusMotion.EMERGENCY;
+                    return "EMERGENCY";
+                default:
+                    Status = RobotStatusMotion.ERROR;
+                    return "Robot does not respond";
             }
-            else if (response == "\"RUNNING\"")
-            {               
-                Status = RobotStatusMotion.RUNNING;
-                return "RUNNING";
-            }
-            else if (response == "\"ZERO_GRAVITY\"")
-            {               
-                Status = RobotStatusMotion.ZERO_GRAVITY;
-                return "ZERO_GRAVITY";
-            }
-            else
-            {     
-                Status = RobotStatusMotion.NOT_RESPOND;
-                return "Robot does not respond";
-            }    
         }
 
+        //TODO: motorStatus в объект
         public async Task<string> GetMotorStatusAsync()
         {
-            HttpResponseMessage response;
-            if (IsConnected)
-            {
-                response = await connection.GetMotorStatus();
-            }
-            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            var response = await _connection.GetMotorStatus();            
 
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var content = await response.Content.ReadAsStringAsync();                
-                var dicts = JsonConvert.DeserializeObject
-                   <List<Dictionary<string, double>>>(await response.Content.ReadAsStringAsync());
+            if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
 
-                MotorStatus.Amperage = new double[6];
-                MotorStatus.Temperature = new double[6];
-                for (int i = 0; i < dicts.Count; i++)
-                {
-                    MotorStatus.Amperage[i] = dicts[i]["current"];
-                    MotorStatus.Temperature[i] = dicts[i]["temperature"];
-                }               
-                return "OK";
+            var content = await response.Content.ReadAsStringAsync();
+            var list = JsonConvert.DeserializeObject<List<Dictionary<string, double>>>(content);
+
+            for (var i = 0; i < list.Count; i++)
+            {
+                MotorStatus.Amperage[i] = list[i]["current"];
+                MotorStatus.Temperature[i] = list[i]["temperature"];
             }
-            else
-            {                         
-                return "Robot does not respond";
-            }           
+
+            return "OK";
         }
-        
-        public override async Task<string> GetJointAnglesAsync()
+
+        //TODO: jointAngles в объект    
+        public override async Task<string> GetPoseAsync()
         {
-            HttpResponseMessage response;
-            if (IsConnected)
-            {
-                response = await connection.GetPose();
-            } 
-            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-            
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var content = await response.Content.ReadAsStringAsync();
-                JointAngles = JsonConvert.DeserializeObject<Dictionary<string, double[]>>(content)["angles"];
-                JointAngles = JointAngles.Select(x=>Math.Round(x, 3)).ToArray();
-                IsConnected = true;                
-                return "OK";
-            }
-            else
-            {                                                                        
-                return "Robot does not respond";
-            }           
+            var response = await _connection.GetPose();
+
+            if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
+            var content = await response.Content.ReadAsStringAsync();
+            JointAngles = JsonConvert.DeserializeObject<Dictionary<string, double[]>>(content)["angles"];
+            JointAngles = JointAngles.Select(x => Math.Round(x, 3)).ToArray();
+            IsConnected = true;
+            return "OK";
+
         }
 
         public override async Task<string> GetPositionAsync()
         {
-            HttpResponseMessage response;
-            if (IsConnected)
+            var response = await _connection.GetPosition();
+
+            if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
+            var content = await response.Content.ReadAsStringAsync();
+            Position = JsonConvert.DeserializeObject<Position>(content);
+            return "OK";
+        }
+
+        public async Task<string> GetIdAsync()
+        {
+            var response = await _connection.GetId();
+
+            if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
+            ID = await response.Content.ReadAsStringAsync();
+            return "OK";
+        }
+
+        public async Task<string> GetDigitalInputAsync(int port)
+        {
+            var response = await _connection.GetDigitalInput(port);
+            switch (response.StatusCode)
             {
-                response = await connection.GetPosition();
-            }            
-            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                case HttpStatusCode.OK:
+                    var content = await response.Content.ReadAsStringAsync();
+                    InputPorts[port - 1] = content == "\"HIGH\"";
+                    return content == "\"LOW\"" ? "LOW" : "HIGH";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
+            }
+        }
+
+        public async Task<string> GetDigitalOutputAsync(int port)
+        {
+            var response = await _connection.GetDigitalOutput(port);
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    var content = await response.Content.ReadAsStringAsync();
+                    OutputPorts[port - 1] = content == "\"HIGH\"";
+                    return content == "\"LOW\"" ? "LOW" : "HIGH";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
+            }
+        }
+
+        public async Task<string> SetBasePositionAsync(double[] position)
+        {
+            var response = await _connection.SetBasePosition(position);
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    BasePosition.Array = position;
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
+            }
+        }
+
+        public async Task<string> SetBasePositionAsync()
+        {
+            var response = await _connection.SetBasePosition(BasePosition);
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
+            }
+        }
+
+        public async Task<string> SetToolAsync()
+        {
+            var response = await _connection.SetTool(Tool);
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
+            }
+        }
+
+        public async Task<string> SetToolAsync(Gripper tool)
+        {
+            var response = await _connection.SetTool(tool);
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    Tool = tool;
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
+            }
+        }
+
+        public async Task<string> RecoverAsync()
+        {
+            var response = await _connection.Recover();
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    return "OK";
+                default:
+                    return "Robot does not respond";
+            }
+        }
+
+        public async Task<string> PackAsync()
+        {
+            var response = await _connection.Pack();
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    return "OK";
+                default:
+                    return "Robot does not respond";
+            }
+        }
+
+        public async Task<string> GetToolAsync()
+        {
+            var response = await _connection.GetTool();
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    var content = await response.Content.ReadAsStringAsync();
+                    Tool = JsonConvert.DeserializeObject<Gripper>(content);
+                    return "OK";
+            }
+
+            return "Robot does not respond";
+        }
+
+        public async Task<string> GetBasePositionAsync()
+        {
+            var response = await _connection.GetBasePosition();
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                var array = await connection.GetPositionArray();                
-                Position.Point = array.Take(3).Select(x=>Math.Round(x,3)).ToArray();
-                Position.Rotation = array.Skip(3).Select(x=>Math.Round(x,3)).ToArray();                
+                var content = await response.Content.ReadAsStringAsync();
+                BasePosition = JsonConvert.DeserializeObject<Position>(content);
                 return "OK";
             }
-            else
-            {                             
-                return "Robot does not respond";
-            }   
+
+            return "Robot does not respond";
         }
 
-        public override async Task<string> SetJointAnglesAsync(double[] angles, int value)
-        {     
-            HttpResponseMessage response;
-            if (IsConnected)
-            {
-                response = await connection.PutPose(angles, value);
-            }
-            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-
-            if (response.StatusCode == HttpStatusCode.OK)
-            {                
-                JointAngles = angles;
-                return "OK";
-            }
-            else if(response.StatusCode == HttpStatusCode.PreconditionFailed)
-            {
-                return await response.Content.ReadAsStringAsync();
-            }
-            else
-            {
-                return "Robot does not respond";
-            }
-        }
-
-        public async Task<string> SetJointAnglesAsync(int value)
+        public override async Task<string> SetPoseAsync(double[] angles, int value)
         {
-            HttpResponseMessage response;
-            if (IsConnected)
+            var response = await _connection.PutPose(angles, value);
+
+            switch (response.StatusCode)
             {
-                response = await connection.PutPose(JointAngles, value);
-            }
-            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-           
-            if (response.StatusCode == HttpStatusCode.OK)
-            {                
-                return "OK";
-            }
-            else if(response.StatusCode == HttpStatusCode.PreconditionFailed)
-            {
-                return await response.Content.ReadAsStringAsync();
-            }
-            else
-            {               
-                return "Robot does not respond";
+                case HttpStatusCode.OK:
+                    JointAngles = angles;
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
             }
         }
 
-        public override async Task<string> SetPositionAsync(double[] position, int value)
+        public async Task<string> SetPoseAsync(int value)
         {
-            HttpResponseMessage response;
-            if (IsConnected)
+            var response = await _connection.PutPose(JointAngles, value);
+
+            switch (response.StatusCode)
             {
-                response = await connection.PutPosition(position, value);
-            }
-            response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-           
-            if(response.StatusCode == HttpStatusCode.OK)
-            {      
-                Position.Array = position;
-                return "OK";
-            }
-            else if(response.StatusCode == HttpStatusCode.PreconditionFailed)
-            {
-                return await response.Content.ReadAsStringAsync();
-            }
-            else
-            {
-                return "Robot does not respond";
+                case HttpStatusCode.OK:
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
             }
         }
 
-        public async Task<string> SetPositionAsync(int value, RobotMoveMode mode = RobotMoveMode.SPEED)
+        //при недостижимой позиции код ошибки равен 500
+        public override async Task<string> SetPositionAsync(double[] position, int value,
+            MotionType type = MotionType.JOINT)
         {
-            HttpResponseMessage response;
-            if (IsConnected)
-            {                
-                response = await connection.PutPosition(Position.ToArray(), value);
-            }
-            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            var response = await _connection.PutPosition(position, value, type);
 
-            if(response.StatusCode == HttpStatusCode.OK)
-            {                
-                return "OK";
-            }
-            else if(response.StatusCode == HttpStatusCode.PreconditionFailed)
+            switch (response.StatusCode)
             {
-                return await response.Content.ReadAsStringAsync();
-            }
-            else
-            {
-                return "Robot does not respond";
+                case HttpStatusCode.OK:
+                    Position.Array = position;
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
             }
         }
 
-        public async Task<string> SetPositionsAsync(double[][] positions, int value)
+        public async Task<string> SetPositionAsync(Position position, int value,
+            MotionType type = MotionType.JOINT)
         {
-            HttpResponseMessage response;
-            if (IsConnected)
-            {
-                response = await connection.RunPositions(positions, value);
-            }
-            response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            var response = await _connection.PutPosition(position, value, type);
 
-            if (response.StatusCode == HttpStatusCode.OK)
+            switch (response.StatusCode)
             {
-                Position.Array = positions.Last();
-                return "OK";
-            }
-            else if (response.StatusCode == HttpStatusCode.PreconditionFailed)
-            {
-                return await response.Content.ReadAsStringAsync();
-            }
-            else
-            {
-                return "Robot does not respond";
+                case HttpStatusCode.OK:
+                    Position = position;
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
             }
         }
 
-        public async Task<string> SetPosesAsync(double[][] angles, int value)
+        public async Task<string> SetPositionAsync(int value, MotionType type = MotionType.JOINT)
         {
-            HttpResponseMessage response;
-            if (IsConnected)
-            {
-                response = await connection.RunPoses(angles, value);
-            }
-            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            var response = await _connection.PutPosition(Position, value, type);
 
-            if (response.StatusCode == HttpStatusCode.OK)
+            switch (response.StatusCode)
             {
-                JointAngles = angles.Last();
-                return "OK";
-            }
-            else if (response.StatusCode == HttpStatusCode.PreconditionFailed)
-            {
-                return await response.Content.ReadAsStringAsync();
-            }
-            else
-            {
-                return "Robot does not respond";
+                case HttpStatusCode.OK:
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
             }
         }
 
-        public async Task<string> OpenGripperAsync()
+        public async Task<string> RunPositionsAsync(double[][] positions, int value, MotionType type = MotionType.JOINT)
         {
-            HttpResponseMessage response;
-            if (IsConnected)
-            {
-                response = await connection.OpenGripper();
-            }
-            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            var response = await _connection.RunPositions(positions, value, type);
 
-            if (response.StatusCode == HttpStatusCode.OK)
+            switch (response.StatusCode)
             {
-                IsGripperOpened = true;
-                return "Gripper opened";
-            }
-            else
-            {
-                return "Robot does not respond";
+                case HttpStatusCode.OK:
+                    Position.Array = positions.Last();
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
             }
         }
 
-        public async Task<string> CloseGripperAsync()
+        public async Task<string> RunPositionsAsync(IEnumerable<Position> positions, int value,
+            MotionType type = MotionType.JOINT)
         {
-            HttpResponseMessage response;
-            if (IsConnected)
-            {
-                response = await connection.CloseGripper();
-            }
-            else response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            var response = await _connection.RunPositions(positions, value, type);            
 
-            if (response.StatusCode == HttpStatusCode.OK)
+            switch (response.StatusCode)
             {
-                IsGripperOpened = false;
-                return "Gripper opened";
+                case HttpStatusCode.OK:
+                    Position = positions.Last();
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
             }
-            else
+        }
+
+        public async Task<string> RunPosesAsync(double[][] angles, int value)
+        {
+            var response = await _connection.RunPoses(angles, value);            
+
+            switch (response.StatusCode)
             {
-                return "Robot does not respond";
+                case HttpStatusCode.OK:
+                    JointAngles = angles.Last();
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
             }
+        }
+
+
+        //TODO: задать таймаут
+        public async Task<string> OpenGripperAsync(int timeout = 500)
+        {
+            var response = await _connection.OpenGripper();            
+
+            if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
+            IsGripperOpened = true;
+            return "Tool opened";
+        }
+
+        //TODO: задать таймаут
+        public async Task<string> CloseGripperAsync(int timeout = 500)
+        {
+            var response = await _connection.CloseGripper();
+            
+            if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
+            IsGripperOpened = false;
+            return "Tool closed";
         }
 
         public void WaitMotion(int askingPeriod = 50)
         {
-            while (GetStatusMotionAsync().Result!="IDLE")
-            {
-                Thread.Sleep(askingPeriod);
-            }
+            while (GetStatusMotionAsync().Result != "IDLE") Thread.Sleep(askingPeriod);
         }
     }
 }

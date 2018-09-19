@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -21,26 +22,92 @@ namespace RozumConnectionLib
         public RozumConnection(string url)
         {            
             URL = url;           
-        }
+        }                
 
-        public void AwaitMotion(int askingPeriod = 20)
-        {
-            while (GetStatusMotionStr().Result!= "\"IDLE\"")
-            {
-                Thread.Sleep(askingPeriod);
-            }            
-        }
-      
-        public async Task<string> GetMotorStatusStr()
+        public async Task<HttpResponseMessage> Recover()
         {
             try
             {
-                var response = await client.GetAsync(URL + "status/motors");          
-                return await response.Content.ReadAsStringAsync();
+                return await client.PutAsync(URL + "recover", null);
             }
             catch (HttpRequestException)
             {
-                return "Can't connect to robot";
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public async Task<HttpResponseMessage> Pack()
+        {
+            try
+            {
+                return await client.PutAsync(URL + "pack", null);
+            }
+            catch (HttpRequestException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public async Task<HttpResponseMessage> SetDigitalOutput(int port, bool value)
+        {
+            try
+            {
+                if(value) return await client.PutAsync(URL + $"signal/output/{port}/high", null);
+                return await client.PutAsync(URL + $"signal/output/{port}/low", null);
+            }
+            catch (HttpRequestException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+
+        }       
+
+        public async Task<HttpResponseMessage> SetTool(Gripper content)
+        {
+            try
+            {
+                return await client.PostAsync(URL + $"tool", 
+                    new StringContent(JsonConvert.SerializeObject(content), Encoding.UTF8, "application/json"));                                
+            }
+            catch (HttpRequestException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public async Task<HttpResponseMessage> GetTool()
+        {
+            try
+            {
+                return await client.GetAsync(URL + $"tool");                                
+            }
+            catch (HttpRequestException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+        }
+        
+        public async Task<HttpResponseMessage> GetDigitalInput(int port)
+        {
+            try
+            {
+                return await client.GetAsync(URL + $"signal/input/{port}");                                
+            }
+            catch (HttpRequestException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public async Task<HttpResponseMessage> GetDigitalOutput(int port)
+        {
+            try
+            {
+                return await client.GetAsync(URL + $"signal/output/{port}");                                
+            }
+            catch (HttpRequestException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
             }
         }
 
@@ -56,81 +123,17 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<List<Dictionary<string, double[]>>> GetMotorStatusDict()
-        {
-            try
-            {
-                var response = await client.GetAsync(URL + "status/motors");          
-                var dict = new List<Dictionary<string, double[]>>();
-                var obj = JsonConvert.DeserializeObject
-                    <List<Dictionary<string, double[]>>>(await response.Content.ReadAsStringAsync());
-                return obj;                
-            }
-            catch (HttpRequestException)
-            {
-                return null;
-            }
-        }
-
         public async Task<string> GetStatusMotionStr()
         {
             try
             {
-                var response = await client.GetAsync(URL + "status/motion");
-                return await response.Content.ReadAsStringAsync();
+                return await client.GetStringAsync(URL + "status/motion");                
             }
             catch (HttpRequestException)
             {
-                return "Can't connect to robot";
+                return "Robot does not respond";
             }
         }       
-
-        public async Task<string> GetPositionStr()
-        {
-            try
-            {
-                var response = await client.GetAsync(URL + "position");            
-                return await response.Content.ReadAsStringAsync();
-            }
-            catch (HttpRequestException)
-            {
-                return "Can't connect to robot";
-            }
-        }
-
-        public async Task<double[]> GetPositionArray()
-        {
-            try
-            {
-                var response = await client.GetStringAsync(URL + "position");
-                var dict = JsonConvert.DeserializeObject
-                    <Dictionary<string, Dictionary<string, double>>>(response);
-                List<double> positon = new List<double>();
-                foreach (var value in dict)
-                {
-                    foreach (var item in value.Value)
-                    {
-                        positon.Add(item.Value);
-                    }
-                }
-
-                for (int i = 0; i < 3; i++)
-                {
-                    positon[i] *=1000;
-                }
-
-                for (int i = 3; i < 6; i++)
-                {
-                    positon[i] = positon[i]*180/Math.PI;
-                }
-
-                return positon.ToArray();
-            }
-            catch (HttpRequestException)
-            {
-                return new double[0];
-            }
-        }
 
         public async Task<HttpResponseMessage> GetPosition()
         {
@@ -144,18 +147,16 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<double[]> GetPoseArray()
+        public async Task<HttpResponseMessage> GetBasePosition()
         {
             try
             {
-                var response = await client.GetStringAsync(URL + "pose");
-                var dict = JsonConvert.DeserializeObject<Dictionary<string, double[]>>(response);
-                return dict["angles"];
+                return await client.GetAsync(URL + "base");                
             }
             catch (HttpRequestException)
-            {                
-                return new double[0];
-            }           
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
         }
         
         public async Task<HttpResponseMessage> GetPose()
@@ -168,84 +169,29 @@ namespace RozumConnectionLib
             {                
                 return new HttpResponseMessage(HttpStatusCode.InternalServerError);
             }           
-        }
+        }           
 
-        //get in degrees
-        public async Task<string> GetPoseStr()
+        public async Task<HttpResponseMessage> GetId()
         {
             try
             {
-                return await client.GetStringAsync(URL + "pose");            
-            }
-            catch (HttpRequestException)
-            {
-                return "Can't connect to robot";
-            }
-        }
-
-        //get in degrees
-        public async Task<Dictionary<string, double[]>> GetPoseDict()
-        {
-            try
-            {
-                var response = await client.GetStringAsync(URL + "pose");
-                var obj = JsonConvert.DeserializeObject
-                    <Dictionary<string, double[]>>(response);
-                return obj;
-            }
-            catch (HttpRequestException)
-            {
-                return new Dictionary<string, double[]>();
-            }
-        }
-
-        public async Task<Dictionary<string, Dictionary<string, double>>> GetPositionDict()
-        {
-            try
-            {
-                var response = await client.GetStringAsync(URL + "position");
-                var obj = JsonConvert.DeserializeObject
-                    <Dictionary<string, Dictionary<string, double>>>(response);
-                return obj;
-            }
-            catch (HttpRequestException)
-            {
-                return null;               
-            }
-        }        
-
-        public async Task<HttpResponseMessage> PutPosition(Dictionary<string, Dictionary<string, double>> dict, int speed)
-        {
-            try
-            {
-                var httpContent = new StringContent(
-                JsonConvert.SerializeObject(dict),
-                Encoding.UTF8, "application/json");            
-                return await client.PutAsync(URL + $"position?speed={speed}", httpContent);
+                return await client.GetAsync(URL + "robot/id");
             }
             catch (HttpRequestException)
             {
                 return new HttpResponseMessage(HttpStatusCode.InternalServerError);
-            }            
+            }
         }
 
-        public async Task<HttpResponseMessage> PutPosition(double[] position, int value)
+        public async Task<HttpResponseMessage> PutPosition(double[] position, int value, MotionType type)
         {
             try
             {
-                var dict = new Dictionary<string, Dictionary<string, double>>();
-                dict["point"] = new Dictionary<string, double>();
-                dict["rotation"] = new Dictionary<string, double>();
-                dict["point"]["x"] = position[0]/1000;
-                dict["point"]["y"] = position[1]/1000;
-                dict["point"]["z"] =  position[2]/1000;
-                dict["rotation"]["roll"] =  position[3]*Math.PI/180;
-                dict["rotation"]["pitch"] =  position[4]*Math.PI/180;
-                dict["rotation"]["yaw"] =  position[5]*Math.PI/180;
+                var pos = new Position{Array = position};
                 var httpContent = new StringContent(
-                    JsonConvert.SerializeObject(dict),
+                    JsonConvert.SerializeObject(pos),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"position?speed={value}", httpContent);
+                return await client.PutAsync(URL + $"position?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}", httpContent);
             }
             catch (IndexOutOfRangeException)
             {
@@ -257,28 +203,69 @@ namespace RozumConnectionLib
             }           
         }
 
-        //set in degrees
-        public async Task<HttpResponseMessage> PutPose(Dictionary<string, double[]> dict, int speed)
+        public async Task<HttpResponseMessage> PutPosition(Position position, int value, MotionType type)
         {
             try
-            {
+            {                
                 var httpContent = new StringContent(
-                JsonConvert.SerializeObject(dict),
-                Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"pose?speed={speed}", httpContent);
+                    JsonConvert.SerializeObject(position),
+                    Encoding.UTF8, "application/json");
+                return await client.PutAsync(URL + $"position?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}", httpContent);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
             catch (HttpRequestException)
             {
                 return new HttpResponseMessage(HttpStatusCode.InternalServerError);
-            }            
+            }           
         }
+
+        public async Task<HttpResponseMessage> SetBasePosition(double[] position)
+        {
+            try
+            {              
+                var httpContent = new StringContent(
+                    JsonConvert.SerializeObject(new Position{Array = position}),
+                    Encoding.UTF8, "application/json");
+                return await client.PostAsync(URL + $"base", httpContent);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            }
+            catch (HttpRequestException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }           
+        }
+
+        public async Task<HttpResponseMessage> SetBasePosition(Position position)
+        {
+            try
+            {                
+                var httpContent = new StringContent(
+                    JsonConvert.SerializeObject(position),
+                    Encoding.UTF8, "application/json");
+                return await client.PostAsync(URL + $"base", httpContent);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            }
+            catch (HttpRequestException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }           
+        }
+            
 
         public async Task<HttpResponseMessage> PutPose(double[] coordinates, int value)
         {
             try
             {
-                var dict = new Dictionary<string, double[]>();
-                dict["angles"] = coordinates;
+                var dict = new Dictionary<string, double[]> {["angles"] = coordinates};
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(dict),
                     Encoding.UTF8, "application/json");
@@ -338,7 +325,7 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> RunPoses(double[][] angles, int value, RobotMoveMode mode)
+        public async Task<HttpResponseMessage> RunPoses(double[][] angles, int value)
         {
             try
             {                
@@ -353,11 +340,7 @@ namespace RozumConnectionLib
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(dict),
                     Encoding.UTF8, "application/json");
-                if (mode == RobotMoveMode.SPEED)
-                {
-                    return await client.PutAsync(URL + $"poses/run?speed={value}", httpContent);
-                }
-                else return await client.PutAsync(URL + $"poses/run?time={value}", httpContent);
+                return await client.PutAsync(URL + $"poses/run?speed={value}", httpContent);
             }
             catch(IndexOutOfRangeException)
             {
@@ -369,33 +352,40 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> RunPositions(double[][] angles, int value, RobotMoveMode mode)
+        public async Task<HttpResponseMessage> RunPositions(double[][] positions, int value, MotionType type)
         {
             try
             {
-                var dict = new List<Dictionary<string, Dictionary<string, double>>>();
+                var list = new List<Position>();
 
-                for (int i = 0; i < angles.GetLength(0); i++)
+                for (int i = 0; i < positions.GetLength(0); i++)
                 {
-                    dict.Add(new Dictionary<string, Dictionary<string, double>>());
-                    dict[i]["point"] = new Dictionary<string, double>();
-                    dict[i]["rotation"] = new Dictionary<string, double>();
-                    dict[i]["point"]["x"] = angles[i][0]/1000;
-                    dict[i]["point"]["y"] = angles[i][1]/1000;
-                    dict[i]["point"]["z"] = angles[i][2]/1000;
-                    dict[i]["rotation"]["roll"] = angles[i][3]*Math.PI/180;
-                    dict[i]["rotation"]["pitch"] = angles[i][4]*Math.PI/180;
-                    dict[i]["rotation"]["yaw"] = angles[i][5]*Math.PI/180;
+                    list.Add(new Position{Array = positions[i]});                   
                 }
 
                 var httpContent = new StringContent(
-                    JsonConvert.SerializeObject(dict),
+                    JsonConvert.SerializeObject(list),
                     Encoding.UTF8, "application/json");
-                if (mode == RobotMoveMode.SPEED)
-                {
-                    return await client.PutAsync(URL + $"positions/run?speed={value}", httpContent);
-                }
-                else return await client.PutAsync(URL + $"positions/run?time={value}", httpContent);
+                return await client.PutAsync(URL + $"positions/run?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}", httpContent);
+            }
+            catch(IndexOutOfRangeException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            }
+            catch (HttpRequestException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public async Task<HttpResponseMessage> RunPositions(IEnumerable<Position> positions, int value, MotionType type)
+        {
+            try
+            {                
+                var httpContent = new StringContent(
+                    JsonConvert.SerializeObject(positions),
+                    Encoding.UTF8, "application/json");
+                return await client.PutAsync(URL + $"positions/run?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}", httpContent);
             }
             catch(IndexOutOfRangeException)
             {
