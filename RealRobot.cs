@@ -352,9 +352,9 @@ namespace RozumConnectionLib
             return "Robot does not respond";
         }
 
-        public override async Task<string> SetPoseAsync(double[] angles, int value)
+        public override async Task<string> SetPoseAsync(double[] angles, int value, MotionType type = MotionType.JOINT)
         {
-            var response = await _connection.PutPose(angles, value);
+            var response = await _connection.PutPose(angles, value, type);
 
             switch (response.StatusCode)
             {
@@ -368,9 +368,9 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> SetPoseAsync(int value)
+        public async Task<string> SetPoseAsync(int value, MotionType type = MotionType.JOINT)
         {
-            var response = await _connection.PutPose(JointAngles, value);
+            var response = await _connection.PutPose(JointAngles, value, type);
 
             switch (response.StatusCode)
             {
@@ -413,6 +413,8 @@ namespace RozumConnectionLib
                     return "OK";
                 case HttpStatusCode.PreconditionFailed:
                     return await response.Content.ReadAsStringAsync();
+                case HttpStatusCode.InternalServerError:
+                    return "Robot does not respond";
                 default:
                     return "Robot does not respond";
             }
@@ -481,22 +483,19 @@ namespace RozumConnectionLib
                     return "Robot does not respond";
             }
         }
-
-
-        //TODO: задать таймаут
+       
         public async Task<string> OpenGripperAsync(int timeout = 500)
         {
-            var response = await _connection.OpenGripper();            
+            var response = await _connection.OpenGripper(timeout);            
 
             if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
             IsGripperOpened = true;
             return "Tool opened";
         }
-
-        //TODO: задать таймаут
+        
         public async Task<string> CloseGripperAsync(int timeout = 500)
         {
-            var response = await _connection.CloseGripper();
+            var response = await _connection.CloseGripper(timeout);
             
             if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
             IsGripperOpened = false;

@@ -261,7 +261,7 @@ namespace RozumConnectionLib
         }
             
 
-        public async Task<HttpResponseMessage> PutPose(double[] coordinates, int value)
+        public async Task<HttpResponseMessage> PutPose(double[] coordinates, int value, MotionType type)
         {
             try
             {
@@ -269,7 +269,7 @@ namespace RozumConnectionLib
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(dict),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"pose?speed={value}", httpContent);
+                return await client.PutAsync(URL + $"pose?speed={value}&mode={(type == MotionType.JOINT ? "JOINT" : "LINEAR")}", httpContent);
             }
             catch (HttpRequestException)
             {
@@ -301,11 +301,16 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> OpenGripper()
+        public async Task<HttpResponseMessage> OpenGripper(int timeout)
         {
             try
             {
-                return await client.PutAsync(URL + "gripper/open", null);
+                var obj = JsonConvert.SerializeObject(new Dictionary<string, int> {{"timeout", timeout}});
+                var content = new StringContent(
+                    obj, 
+                    Encoding.UTF8,
+                    "application/json");
+                return await client.PutAsync(URL + "gripper/open", content);
             }
             catch (HttpRequestException)
             {
@@ -313,11 +318,16 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> CloseGripper()
+        public async Task<HttpResponseMessage> CloseGripper(int timeout)
         {
             try
             {
-                return await client.PutAsync(URL + "gripper/close", null);
+                var obj = JsonConvert.SerializeObject(new Dictionary<string, int> { { "timeout", timeout } });
+                var content = new StringContent(
+                    obj,
+                    Encoding.UTF8,
+                    "application/json");
+                return await client.PutAsync(URL + "gripper/close", content);
             }
             catch (HttpRequestException)
             {

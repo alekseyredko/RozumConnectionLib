@@ -14,7 +14,7 @@ namespace RozumConnectionLib
         public abstract Task<string> GetPositionAsync();
         public abstract Task<string> GetPoseAsync();
         public abstract Task<string> SetPositionAsync(double[] position, int value, MotionType type = MotionType.JOINT);
-        public abstract Task<string> SetPoseAsync(double[] angles, int value);
+        public abstract Task<string> SetPoseAsync(double[] angles, int value, MotionType type = MotionType.JOINT);
     }
 
     public enum RobotStatusMotion
