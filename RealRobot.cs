@@ -151,7 +151,7 @@ namespace RozumConnectionLib
             }
         }
 
-        //TODO: motorStatus в объект
+        //TODO: Переделать сбор данных
         public async Task<string> GetMotorStatusAsync()
         {
             var response = await _connection.GetMotorStatus();            
@@ -159,13 +159,7 @@ namespace RozumConnectionLib
             if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
 
             var content = await response.Content.ReadAsStringAsync();
-            var list = JsonConvert.DeserializeObject<List<Dictionary<string, double>>>(content);
-
-            for (var i = 0; i < list.Count; i++)
-            {
-                MotorStatus.Amperage[i] = list[i]["current"];
-                MotorStatus.Temperature[i] = list[i]["temperature"];
-            }
+            MotorStatus.Joints = JsonConvert.DeserializeObject<IEnumerable<JointStatus>>(content);
 
             return "OK";
         }
