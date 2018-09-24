@@ -24,6 +24,32 @@ namespace RozumConnectionLib
             }
         }
 
+        public double this[int index]
+        {
+            get
+            {
+                if (index < 0 && index > 2) return double.NaN;
+                return ToArray()[index];
+            }
+            set
+            {                
+                switch (index)
+                {
+                    case 0:
+                        X = value;
+                        return;
+                    case 1:
+                        Y = value;
+                        return;
+                    case 2:
+                        Z = value;
+                        return;
+                    default:
+                        return;
+                }
+            }
+        }
+
         public Point(){}
 
         public Point(SerializationInfo info, StreamingContext context)

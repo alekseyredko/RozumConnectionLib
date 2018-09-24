@@ -26,6 +26,32 @@ namespace RozumConnectionLib
             }
         }
 
+        public double this[int index]
+        {
+            get
+            {
+                if (index < 0 && index > 2) return double.NaN;
+                return ToArray()[index];
+            }
+            set
+            {
+                switch (index)
+                {
+                    case 0:
+                        Roll = value;
+                        return;
+                    case 1:
+                        Pitch = value;
+                        return;
+                    case 2:
+                        Yaw = value;
+                        return;
+                    default:
+                        return;
+                }
+            }
+        }
+
         public Rotation(){}
 
         public Rotation(SerializationInfo info, StreamingContext context)
@@ -42,6 +68,8 @@ namespace RozumConnectionLib
             info.AddValue("pitch", Pitch);
             info.AddValue("yaw", Yaw);
         }
+
+        public double[] ToArray() => new[] {Roll, Pitch, Yaw};
 
         public override string ToString()
         {
