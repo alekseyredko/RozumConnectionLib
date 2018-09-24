@@ -150,8 +150,34 @@ namespace RozumConnectionLib
                     return "Robot does not respond";
             }
         }
+        
+        public string GetStatusMotion()
+        {
+            var response = _connection.GetStatusMotionStr().Result;            
 
-        //TODO: Переделать сбор данных
+            switch (response)
+            {
+                case "\"IDLE\"":
+                    Status = RobotStatusMotion.IDLE;
+                    return "IDLE";
+                case "\"RUNNING\"":
+                    Status = RobotStatusMotion.RUNNING;
+                    return "RUNNING";
+                case "\"ZERO_GRAVITY\"":
+                    Status = RobotStatusMotion.ZERO_GRAVITY;
+                    return "ZERO_GRAVITY";
+                case "\"MOTION_FAILED\"":
+                    Status = RobotStatusMotion.MOTION_FAILED;
+                    return "MOTION_FAILED";
+                case "\"EMERGENCY\"":
+                    Status = RobotStatusMotion.EMERGENCY;
+                    return "EMERGENCY";
+                default:
+                    Status = RobotStatusMotion.ERROR;
+                    return "Robot does not respond";
+            }
+        }
+
         public async Task<string> GetMotorStatusAsync()
         {
             var response = await _connection.GetMotorStatus();            
@@ -346,7 +372,7 @@ namespace RozumConnectionLib
             return "Robot does not respond";
         }
 
-        public override async Task<string> SetPoseAsync(double[] angles, int value, MotionType type = MotionType.JOINT)
+        public override async Task<string> SetPoseAsync(IEnumerable<double> angles, int value, MotionType type = MotionType.JOINT)
         {
             var response = await _connection.PutPose(angles, value, type);
 
@@ -378,7 +404,7 @@ namespace RozumConnectionLib
         }
 
         //при недостижимой позиции код ошибки равен 500
-        public override async Task<string> SetPositionAsync(double[] position, int value,
+        public override async Task<string> SetPositionAsync(IEnumerable<double> position, int value,
             MotionType type = MotionType.JOINT)
         {
             var response = await _connection.PutPosition(position, value, type);
