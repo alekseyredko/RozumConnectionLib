@@ -37,7 +37,6 @@ namespace RozumConnectionLib
             Rotation = rotation;
         }
 
-
         public override string ToString()
         {
             return $"Point: {Point}; Rotation: {Rotation};";

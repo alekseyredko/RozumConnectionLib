@@ -183,7 +183,7 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> PutPosition(double[] position, int value, MotionType type)
+        public async Task<HttpResponseMessage> PutPosition(IEnumerable<double> position, int value, MotionType type)
         {
             try
             {
@@ -261,11 +261,11 @@ namespace RozumConnectionLib
         }
             
 
-        public async Task<HttpResponseMessage> PutPose(double[] coordinates, int value, MotionType type)
+        public async Task<HttpResponseMessage> PutPose(IEnumerable<double> coordinates, int value, MotionType type)
         {
             try
             {
-                var dict = new Dictionary<string, double[]> {["angles"] = coordinates};
+                var dict = new Dictionary<string, IEnumerable<double>> {["angles"] = coordinates};
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(dict),
                     Encoding.UTF8, "application/json");
