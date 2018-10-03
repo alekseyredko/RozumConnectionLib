@@ -99,30 +99,46 @@ namespace RozumConnectionLib
             }
         }
 
+        public void WaitForInputSignal(int port, bool state, int askPeriod = 50)
+        {
+            var response = GetDigitalInputAsync(port).Result;
+            var result = state ? "HIGH" : "LOW";
+            if (response == "Robot does not respond") return;            
+            while (response!=result)
+            {
+                response = GetDigitalInputAsync(port).Result;
+                Thread.Sleep(askPeriod);
+            }
+        }
+
+        public void WaitForOutputSignal(int port, bool state, int askPeriod = 50)
+        {
+            var response = GetDigitalOutputAsync(port).Result;
+            var result = state ? "HIGH" : "LOW";
+            if (response == "Robot does not respond") return; 
+            while (response!=result)
+            {
+                response = GetDigitalInputAsync(port).Result;
+                Thread.Sleep(askPeriod);
+            }
+        }
+
         public async Task<string> SetModeAsync(RobotMode mode)
         {
             HttpResponseMessage response;
-            if (IsConnected)
+            if (mode == RobotMode.Freeze)
             {
-                if (mode == RobotMode.Freeze)
-                {
-                    response = await _connection.SetFreezeMode();
-                    Mode = RobotMode.Freeze;
-                }
-                else
-                {
-                    response = await _connection.SetRelaxMode();
-                    Mode = RobotMode.Relax;
-                }
+                response = await _connection.SetFreezeMode();
+                Mode = RobotMode.Freeze;
             }
             else
             {
-                response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                response = await _connection.SetRelaxMode();
+                Mode = RobotMode.Relax;
             }
 
             return response.StatusCode == HttpStatusCode.OK ? "OK" : "Robot does not respond";
         }
-
 
         public async Task<string> GetStatusMotionAsync()
         {
