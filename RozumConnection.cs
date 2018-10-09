@@ -259,7 +259,21 @@ namespace RozumConnectionLib
                 return new HttpResponseMessage(HttpStatusCode.InternalServerError);
             }           
         }
-            
+       
+        public async Task<HttpResponseMessage> PutPose(Pose pose, int value, MotionType type)
+        {
+            try
+            {               
+                var httpContent = new StringContent(
+                    JsonConvert.SerializeObject(pose),
+                    Encoding.UTF8, "application/json");
+                return await client.PutAsync(URL + $"pose?speed={value}&mode={(type == MotionType.JOINT ? "JOINT" : "LINEAR")}", httpContent);
+            }
+            catch (HttpRequestException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+        }
 
         public async Task<HttpResponseMessage> PutPose(IEnumerable<double> coordinates, int value, MotionType type)
         {
@@ -349,6 +363,25 @@ namespace RozumConnectionLib
 
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(dict),
+                    Encoding.UTF8, "application/json");
+                return await client.PutAsync(URL + $"poses/run?speed={value}", httpContent);
+            }
+            catch(IndexOutOfRangeException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);    
+            }
+            catch (HttpRequestException)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public async Task<HttpResponseMessage> RunPoses(IEnumerable<Pose> poses, int value)
+        {
+            try
+            {                               
+                var httpContent = new StringContent(
+                    JsonConvert.SerializeObject(poses),
                     Encoding.UTF8, "application/json");
                 return await client.PutAsync(URL + $"poses/run?speed={value}", httpContent);
             }

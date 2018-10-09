@@ -27,13 +27,13 @@ namespace RozumConnectionLib
         {
             get
             {
-                if (index < 0 || index > 5) return double.NaN;
+                if (index < 0 || index > 5) throw new IndexOutOfRangeException();
                 if (index >= 0 && index <= 2) return Point[index];
                 return Rotation[index];
             }
             set
             {
-                if (index < 0 || index > 5) return;
+                if (index < 0 || index > 5) throw new IndexOutOfRangeException();
                 if (index >= 0 && index <= 2) Point[index] = value;
                 else Rotation[index] = value;
             }

@@ -37,7 +37,7 @@ namespace RozumConnectionLib
 
         public string URL
         {
-            get => $"http://{_url}:8081/";
+            get => _url;
             set
             {
                 _url = value;
@@ -61,7 +61,7 @@ namespace RozumConnectionLib
             Tool = new Gripper();
             InputPorts = new bool[6];
             OutputPorts = new bool[6];
-            JointAngles = new double[6];
+            JointAngles = new Pose();
             Position = new Position();
             BasePosition = new Position();
             MotorStatus = new MotorStatus();
@@ -213,8 +213,7 @@ namespace RozumConnectionLib
 
             if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
             var content = await response.Content.ReadAsStringAsync();
-            JointAngles = JsonConvert.DeserializeObject<Dictionary<string, double[]>>(content)["angles"];
-            JointAngles = JointAngles.Select(x => Math.Round(x, 3)).ToArray();
+            JointAngles = JsonConvert.DeserializeObject<Pose>(content);           
             IsConnected = true;
             return "OK";
 
@@ -290,6 +289,21 @@ namespace RozumConnectionLib
         public async Task<string> SetBasePositionAsync()
         {
             var response = await _connection.SetBasePosition(BasePosition);
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
+            }
+        }
+
+        public async Task<string> SetBasePositionAsync(Position basePosition)
+        {
+            var response = await _connection.SetBasePosition(basePosition);
 
             switch (response.StatusCode)
             {
@@ -388,6 +402,22 @@ namespace RozumConnectionLib
             return "Robot does not respond";
         }
 
+        public async Task<string> SetPoseAsync(Pose pose, int value, MotionType type = MotionType.JOINT)
+        {
+            var response = await _connection.PutPose(pose, value, type);
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    JointAngles = pose;
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
+            }
+        }
+
         public override async Task<string> SetPoseAsync(IEnumerable<double> angles, int value, MotionType type = MotionType.JOINT)
         {
             var response = await _connection.PutPose(angles, value, type);
@@ -395,7 +425,7 @@ namespace RozumConnectionLib
             switch (response.StatusCode)
             {
                 case HttpStatusCode.OK:
-                    JointAngles = angles.ToArray();
+                    JointAngles.Angles = angles;
                     return "OK";
                 case HttpStatusCode.PreconditionFailed:
                     return await response.Content.ReadAsStringAsync();
@@ -406,7 +436,7 @@ namespace RozumConnectionLib
 
         public async Task<string> SetPoseAsync(int value, MotionType type = MotionType.JOINT)
         {
-            var response = await _connection.PutPose(JointAngles, value, type);
+            var response = await _connection.PutPose(JointAngles.Angles, value, type);
 
             switch (response.StatusCode)
             {
@@ -511,7 +541,7 @@ namespace RozumConnectionLib
             switch (response.StatusCode)
             {
                 case HttpStatusCode.OK:
-                    JointAngles = angles.Last();
+                    JointAngles.Angles = angles.Last();
                     return "OK";
                 case HttpStatusCode.PreconditionFailed:
                     return await response.Content.ReadAsStringAsync();
@@ -520,6 +550,22 @@ namespace RozumConnectionLib
             }
         }
        
+        public async Task<string> RunPosesAsync(IEnumerable<Pose> poses, int value)
+        {
+            var response = await _connection.RunPoses(poses, value);            
+
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    JointAngles = poses.Last();
+                    return "OK";
+                case HttpStatusCode.PreconditionFailed:
+                    return await response.Content.ReadAsStringAsync();
+                default:
+                    return "Robot does not respond";
+            }
+        }
+
         public async Task<string> OpenGripperAsync(int timeout = 500)
         {
             var response = await _connection.OpenGripper(timeout);            

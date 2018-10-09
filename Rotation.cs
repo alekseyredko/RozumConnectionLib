@@ -30,7 +30,7 @@ namespace RozumConnectionLib
         {
             get
             {
-                if (index < 0 && index > 2) return double.NaN;
+                if (index < 0 && index > 2) throw new IndexOutOfRangeException();
                 return ToArray()[index];
             }
             set
@@ -47,7 +47,7 @@ namespace RozumConnectionLib
                         Yaw = value;
                         return;
                     default:
-                        return;
+                        throw new IndexOutOfRangeException();
                 }
             }
         }
