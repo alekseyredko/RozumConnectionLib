@@ -18,7 +18,7 @@ namespace RozumConnectionLib
 
         public Pose()
         {
-
+            _angles = new double[6];
         }
 
         public Pose(IEnumerable<double> angles)
