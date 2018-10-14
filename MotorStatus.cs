@@ -11,7 +11,12 @@ namespace RozumConnectionLib
         {
             Joints = new[]
             {
-                new JointStatus(), new JointStatus(), new JointStatus(), new JointStatus(), new JointStatus()
+                new JointStatus(), 
+                new JointStatus(), 
+                new JointStatus(), 
+                new JointStatus(), 
+                new JointStatus(),
+                new JointStatus()
             };
         }       
     }

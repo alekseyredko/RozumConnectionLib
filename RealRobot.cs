@@ -192,7 +192,7 @@ namespace RozumConnectionLib
                     Status = RobotStatusMotion.ERROR;
                     return "Robot does not respond";
             }
-        }
+        }       
 
         public async Task<string> GetMotorStatusAsync()
         {
@@ -587,6 +587,16 @@ namespace RozumConnectionLib
         public void WaitMotion(int askingPeriod = 50)
         {
             while (GetStatusMotionAsync().Result != "IDLE") Thread.Sleep(askingPeriod);
+        }
+        //TODO: проверить асинхронное ожидание
+        public async Task WaitMotionAsync(int askingPeriod = 50)
+        {
+            var result = await GetStatusMotionAsync();
+            while (result !="IDLE")
+            {
+                Thread.Sleep(askingPeriod);
+                result = await GetStatusMotionAsync();
+            }
         }
     }
 }
