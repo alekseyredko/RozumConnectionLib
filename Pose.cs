@@ -39,5 +39,10 @@ namespace RozumConnectionLib
                 _angles[index] = value;
             }
         }
+
+        public override string ToString()
+        {
+            return string.Join(", ", Angles);
+        }
     }
 }

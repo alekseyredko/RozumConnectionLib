@@ -586,14 +586,23 @@ namespace RozumConnectionLib
 
         public void WaitMotion(int askingPeriod = 50)
         {
-            while (GetStatusMotionAsync().Result != "IDLE") Thread.Sleep(askingPeriod);
+            var result = GetStatusMotionAsync().Result;
+            if (result != "RUNNING" && result != "IDLE") return;
+            
+            while (result !="IDLE")
+            {               
+                Thread.Sleep(askingPeriod);
+                result = GetStatusMotionAsync().Result;
+            }
         }
-        //TODO: проверить асинхронное ожидание
+        
         public async Task WaitMotionAsync(int askingPeriod = 50)
         {
             var result = await GetStatusMotionAsync();
+            if (result != "RUNNING" && result != "IDLE") return;
+            
             while (result !="IDLE")
-            {
+            {               
                 Thread.Sleep(askingPeriod);
                 result = await GetStatusMotionAsync();
             }
