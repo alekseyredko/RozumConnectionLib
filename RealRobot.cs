@@ -111,6 +111,18 @@ namespace RozumConnectionLib
             }
         }
 
+        public async Task WaitForInputSignalAsync(int port, bool state, int askPeriod = 50)
+        {
+            var response = await GetDigitalInputAsync(port);
+            var result = state ? "HIGH" : "LOW";
+            if (response == "Robot does not respond") return;            
+            while (response!=result)
+            {
+                response = await GetDigitalInputAsync(port);
+                Thread.Sleep(askPeriod);
+            }
+        }
+
         public void WaitForOutputSignal(int port, bool state, int askPeriod = 50)
         {
             var response = GetDigitalOutputAsync(port).Result;
@@ -119,6 +131,18 @@ namespace RozumConnectionLib
             while (response!=result)
             {
                 response = GetDigitalInputAsync(port).Result;
+                Thread.Sleep(askPeriod);
+            }
+        }
+
+        public async Task WaitForOutputSignalAsync(int port, bool state, int askPeriod = 50)
+        {
+            var response = await GetDigitalOutputAsync(port);
+            var result = state ? "HIGH" : "LOW";
+            if (response == "Robot does not respond") return; 
+            while (response!=result)
+            {
+                response = await GetDigitalInputAsync(port);
                 Thread.Sleep(askPeriod);
             }
         }
