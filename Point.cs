@@ -4,9 +4,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 
 namespace RozumConnectionLib
-{
-    [Serializable]
-    public class Point: ISerializable
+{    
+    public class Point: ICloneable
     {
         public double X { get; set; }
         public double Y { get; set; }
@@ -50,28 +49,18 @@ namespace RozumConnectionLib
             }
         }
 
-        public Point(){}
-
-        public Point(SerializationInfo info, StreamingContext context)
-        {
-            Coordinate = new List<double>
-            {
-                info.GetDouble("x"), info.GetDouble("y"), info.GetDouble("z")
-            };
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("x", X);
-            info.AddValue("y", Y);
-            info.AddValue("z", Z);
-        }
+        public Point(){}          
 
         public double[] ToArray() => new[] {X, Y, Z};
 
         public override string ToString()
         {
             return $"X: {X}, Y: {Y}, Z: {Z}";
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 }

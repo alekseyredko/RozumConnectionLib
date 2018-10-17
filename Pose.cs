@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RozumConnectionLib
 {
-    public class Pose
+    public class Pose: ICloneable
     {
         private double[] _angles;
         public IEnumerable<double> Angles
@@ -43,6 +43,13 @@ namespace RozumConnectionLib
         public override string ToString()
         {
             return string.Join(", ", Angles);
+        }
+
+        public object Clone()
+        {
+            var pose = (Pose)this.MemberwiseClone();
+            pose._angles = (double[])this._angles.Clone();
+            return pose;
         }
     }
 }

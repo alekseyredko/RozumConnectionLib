@@ -6,9 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace RozumConnectionLib
-{
-    [Serializable]
-    public class Rotation:ISerializable
+{    
+    public class Rotation: ICloneable
     {
         public double Roll { get; set; }
         public double Pitch { get; set; }
@@ -54,26 +53,16 @@ namespace RozumConnectionLib
 
         public Rotation(){}
 
-        public Rotation(SerializationInfo info, StreamingContext context)
-        {
-            Angles = new List<double>
-            {
-                info.GetDouble("roll"), info.GetDouble("pitch"), info.GetDouble("yaw")
-            };
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("roll", Roll);
-            info.AddValue("pitch", Pitch);
-            info.AddValue("yaw", Yaw);
-        }
-
         public double[] ToArray() => new[] {Roll, Pitch, Yaw};
 
         public override string ToString()
         {
             return $"Roll: {Roll}, Pitch: {Pitch}, Yaw: {Yaw}";
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 }
