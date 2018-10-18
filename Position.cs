@@ -5,8 +5,9 @@ using System.Linq;
 using System.Runtime.Serialization;
 
 namespace RozumConnectionLib
-{    
-    public class Position: ICloneable
+{
+    [Serializable]
+    public class Position: ISerializable
     {
         public Point Point { get; set; }
         public Rotation Rotation { get; set; }
@@ -44,17 +45,23 @@ namespace RozumConnectionLib
             Rotation = new Rotation();
         }
 
+        public Position(SerializationInfo info, StreamingContext context)
+        {
+            var point = (Point)info.GetValue("point", typeof(Point));
+            var rotation = (Rotation)info.GetValue("rotation", typeof(Rotation));
+            Point = point;
+            Rotation = rotation;
+        }
+
         public override string ToString()
         {
             return $"Point: {Point}; Rotation: {Rotation};";
         }
 
-        public object Clone()
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            var position = (Position)this.MemberwiseClone();
-            position.Point = (Point)this.Point.Clone();
-            position.Rotation = (Rotation) this.Rotation.Clone();
-            return position;
+            info.AddValue("point", Point);
+            info.AddValue("rotation", Rotation);
         }
 
         public double[] ToArray()
