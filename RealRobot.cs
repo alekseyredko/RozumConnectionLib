@@ -229,8 +229,7 @@ namespace RozumConnectionLib
 
             return "OK";
         }
-
-        //TODO: jointAngles в объект    
+        
         public override async Task<string> GetPoseAsync()
         {
             var response = await _connection.GetPose();
