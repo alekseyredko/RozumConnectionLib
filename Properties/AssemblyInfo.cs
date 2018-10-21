@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // набора атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
 [assembly: AssemblyTitle("RozumConnectionLib")]
-[assembly: AssemblyDescription("Simple library to handle with Rozum Pulse")]
+[assembly: AssemblyDescription("A simple C# wrapper using REST API for Rozum robots")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Savushkin Product")]
 [assembly: AssemblyProduct("RozumConnectionLib")]
