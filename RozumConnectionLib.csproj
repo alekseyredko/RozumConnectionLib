@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.1.1</Version>
+    <Company>SavushkinProduct</Company>
+    <Description>A simple C# wrapper using REST API for Rozum robots</Description>
+    <Authors>Aleksey Redko</Authors>
+    <PackageProjectUrl></PackageProjectUrl>
+    <PackageLicenseUrl>https://www.gnu.org/licenses/gpl-3.0.html</PackageLicenseUrl>
+    <PackageTags>HTTP Rozum pulse rozum rozumconnectionlib</PackageTags>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <RepositoryUrl>https://github.com/alekseyredko/RozumConnectionLib</RepositoryUrl>
+    <RepositoryType>Open</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
