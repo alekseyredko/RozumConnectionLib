@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace RozumConnectionLib
 {
-    public class Pose
+    [Serializable]
+    public class Pose: ISerializable
     {
         private double[] _angles;
         public IEnumerable<double> Angles
@@ -24,6 +25,11 @@ namespace RozumConnectionLib
         public Pose(IEnumerable<double> angles)
         {
             Angles = angles;
+        }
+
+        public Pose(SerializationInfo info, StreamingContext context)
+        {
+            Angles = info.GetValue("angles", typeof(IEnumerable<double>)) as IEnumerable<double>;
         }
 
         public double this[int index]
@@ -43,6 +49,11 @@ namespace RozumConnectionLib
         public override string ToString()
         {
             return string.Join(", ", Angles);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("angles", _angles);
         }
     }
 }
