@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -9,9 +11,11 @@ namespace RozumConnectionLib
     [Serializable]
     public class Position: ISerializable
     {
+        [Key]
+        public int Id { get; set; }
         public Point Point { get; set; }
         public Rotation Rotation { get; set; }
-
+        [NotMapped]
         public IEnumerable<double> Array
         {
             get => Point.Coordinate.Concat(Rotation.Angles);

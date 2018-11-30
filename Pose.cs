@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -10,7 +12,12 @@ namespace RozumConnectionLib
     [Serializable]
     public class Pose: ISerializable
     {
+        [Key]
+        public int Id { get; set; }
+
+        [NotMapped]
         private double[] _angles;
+        [NotMapped]
         public IEnumerable<double> Angles
         {
             get => _angles;

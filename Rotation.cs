@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -10,10 +12,13 @@ namespace RozumConnectionLib
     [Serializable]
     public class Rotation:ISerializable
     {
+        [Key]
+        public int Id { get; set; }
         public double Roll { get; set; }
         public double Pitch { get; set; }
         public double Yaw { get; set; }
 
+        [NotMapped]
         public IEnumerable<double> Angles
         {
             get => new[] {Roll, Pitch, Yaw};
