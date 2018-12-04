@@ -183,7 +183,7 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> PutPosition(IEnumerable<double> position, int value, MotionType type)
+        public async Task<HttpResponseMessage> PutPosition(IEnumerable<double> position, int value, MotionType type, float maxVelocity)
         {
             try
             {
@@ -191,7 +191,7 @@ namespace RozumConnectionLib
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(pos),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"position?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}", httpContent);
+                return await client.PutAsync(URL + $"position?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}&tcp_max_velocity={maxVelocity}", httpContent);
             }
             catch (IndexOutOfRangeException)
             {
@@ -203,14 +203,14 @@ namespace RozumConnectionLib
             }           
         }
 
-        public async Task<HttpResponseMessage> PutPosition(Position position, int value, MotionType type)
+        public async Task<HttpResponseMessage> PutPosition(Position position, int value, MotionType type, float maxVelocity)
         {
             try
             {                
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(position),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"position?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}", httpContent);
+                return await client.PutAsync(URL + $"position?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}&tcp_max_velocity={maxVelocity}", httpContent);
             }
             catch (IndexOutOfRangeException)
             {
@@ -260,14 +260,14 @@ namespace RozumConnectionLib
             }           
         }
        
-        public async Task<HttpResponseMessage> PutPose(Pose pose, int value, MotionType type)
+        public async Task<HttpResponseMessage> PutPose(Pose pose, int value, MotionType type, float maxVelocity)
         {
             try
             {               
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(pose),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"pose?speed={value}&mode={(type == MotionType.JOINT ? "JOINT" : "LINEAR")}", httpContent);
+                return await client.PutAsync(URL + $"pose?speed={value}&mode={(type == MotionType.JOINT ? "JOINT" : "LINEAR")}&tcp_max_velocity={maxVelocity}", httpContent);
             }
             catch (HttpRequestException)
             {
@@ -275,7 +275,7 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> PutPose(IEnumerable<double> coordinates, int value, MotionType type)
+        public async Task<HttpResponseMessage> PutPose(IEnumerable<double> coordinates, int value, MotionType type, float maxVelocity)
         {
             try
             {
@@ -283,7 +283,7 @@ namespace RozumConnectionLib
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(dict),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"pose?speed={value}&mode={(type == MotionType.JOINT ? "JOINT" : "LINEAR")}", httpContent);
+                return await client.PutAsync(URL + $"pose?speed={value}&mode={(type == MotionType.JOINT ? "JOINT" : "LINEAR")}&tcp_max_velocity={maxVelocity}", httpContent);
             }
             catch (HttpRequestException)
             {
@@ -349,7 +349,7 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> RunPoses(double[][] angles, int value)
+        public async Task<HttpResponseMessage> RunPoses(double[][] angles, int value, MotionType type, float maxVelocity)
         {
             try
             {                
@@ -364,7 +364,7 @@ namespace RozumConnectionLib
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(dict),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"poses/run?speed={value}", httpContent);
+                return await client.PutAsync(URL + $"poses/run?speed={value}&mode={(type == MotionType.JOINT ? "JOINT" : "LINEAR")}&tcp_max_velocity={maxVelocity}", httpContent);
             }
             catch(IndexOutOfRangeException)
             {
@@ -376,14 +376,14 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> RunPoses(IEnumerable<Pose> poses, int value)
+        public async Task<HttpResponseMessage> RunPoses(IEnumerable<Pose> poses, int value, MotionType type, float maxVelocity)
         {
             try
             {                               
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(poses),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"poses/run?speed={value}", httpContent);
+                return await client.PutAsync(URL + $"poses/run?speed={value}&mode={(type == MotionType.JOINT ? "JOINT" : "LINEAR")}&tcp_max_velocity={maxVelocity}", httpContent);
             }
             catch(IndexOutOfRangeException)
             {
@@ -395,7 +395,7 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> RunPositions(double[][] positions, int value, MotionType type)
+        public async Task<HttpResponseMessage> RunPositions(double[][] positions, int value, MotionType type, float maxVelocity)
         {
             try
             {
@@ -409,7 +409,7 @@ namespace RozumConnectionLib
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(list),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"positions/run?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}", httpContent);
+                return await client.PutAsync(URL + $"positions/run?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}&tcp_max_velocity={maxVelocity}", httpContent);
             }
             catch(IndexOutOfRangeException)
             {
@@ -421,14 +421,14 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<HttpResponseMessage> RunPositions(IEnumerable<Position> positions, int value, MotionType type)
+        public async Task<HttpResponseMessage> RunPositions(IEnumerable<Position> positions, int value, MotionType type, float maxVelocity)
         {
             try
             {                
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(positions),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"positions/run?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}", httpContent);
+                return await client.PutAsync(URL + $"positions/run?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}&tcp_max_velocity={maxVelocity}", httpContent);
             }
             catch(IndexOutOfRangeException)
             {
