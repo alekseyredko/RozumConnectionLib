@@ -15,12 +15,19 @@ namespace RozumConnectionLib
 
         private string _url;
 
+        public RealRobot(string ip, int port = 8080)
+        {
+            Status = RobotStatusMotion.ERROR;
+            InitValues();
+            Port = port;
+            InitConnection(ip, port);
+        }
+
         public RealRobot(string ip)
         {
             Status = RobotStatusMotion.ERROR;
-            InitConnection(ip);
-
             InitValues();
+            InitConnection(ip, Port);            
         }
 
         public RealRobot()
@@ -41,9 +48,22 @@ namespace RozumConnectionLib
             set
             {
                 _url = value;
-                InitConnection(value);
+                InitConnection(value, Port);
             }
         }
+
+        private int _port;
+
+        public int Port
+        {
+            get { return _port; }
+            set
+            {
+                _port = value;
+                InitConnection(URL, value);
+            }
+        }
+
 
         public MotorStatus MotorStatus { get; protected set; }
 
@@ -58,32 +78,31 @@ namespace RozumConnectionLib
         private void InitValues()
         {
             ID = "";
+            Port = 8080;
             Tool = new Gripper();
-            InputPorts = new bool[6];
-            OutputPorts = new bool[6];
+            InputPorts = new bool[4];
+            OutputPorts = new bool[2];
             JointAngles = new Pose();
             Position = new Position();
             BasePosition = new Position();
             MotorStatus = new MotorStatus();
         }
 
-        private void InitConnection(string ip)
+        private void InitConnection(string ip, int port)
         {
             if (IPAddress.TryParse(ip, out var iP))
             {
-                _connection = new RozumConnection($"http://{ip}:8081/");
-                //GetStatusMotionAsync().Wait(2000);               
-                //IsConnected = Status != RobotStatusMotion.ERROR;
+                _connection = new RozumConnection($"http://{ip}:{port}/");                
                 IsConnected = true;
             }
             else
             {
-                _connection = new RozumConnection(URL);
+                _connection = new RozumConnection($"http://{ip}:{port}/");
                 IsConnected = false;
             }
         }
 
-        public async Task<string> SetDigitalOutput(int port, bool value)
+        public async Task<string> SetDigitalOutputAsync(int port, bool value)
         {
             var response = await _connection.SetDigitalOutput(port, value);
 
@@ -425,9 +444,10 @@ namespace RozumConnectionLib
             return "Robot does not respond";
         }
 
-        public async Task<string> SetPoseAsync(Pose pose, int value, MotionType type = MotionType.JOINT)
+        public async Task<string> SetPoseAsync(Pose pose, int value,
+            MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.PutPose(pose, value, type);
+            var response = await _connection.PutPose(pose, value, type, maxVelocity);
 
             switch (response.StatusCode)
             {
@@ -441,9 +461,10 @@ namespace RozumConnectionLib
             }
         }
 
-        public override async Task<string> SetPoseAsync(IEnumerable<double> angles, int value, MotionType type = MotionType.JOINT)
+        public async Task<string> SetPoseAsync(IEnumerable<double> angles, int value,
+            MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.PutPose(angles, value, type);
+            var response = await _connection.PutPose(angles, value, type, maxVelocity);
 
             switch (response.StatusCode)
             {
@@ -457,9 +478,9 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> SetPoseAsync(int value, MotionType type = MotionType.JOINT)
+        public async Task<string> SetPoseAsync(int value, MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.PutPose(JointAngles.Angles, value, type);
+            var response = await _connection.PutPose(JointAngles.Angles, value, type, maxVelocity);
 
             switch (response.StatusCode)
             {
@@ -471,12 +492,11 @@ namespace RozumConnectionLib
                     return "Robot does not respond";
             }
         }
-
-        //при недостижимой позиции код ошибки равен 500
-        public override async Task<string> SetPositionAsync(IEnumerable<double> position, int value,
-            MotionType type = MotionType.JOINT)
+       
+        public async Task<string> SetPositionAsync(IEnumerable<double> position, int value,
+            MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.PutPosition(position, value, type);
+            var response = await _connection.PutPosition(position, value, type, maxVelocity);
 
             switch (response.StatusCode)
             {
@@ -491,9 +511,9 @@ namespace RozumConnectionLib
         }
 
         public async Task<string> SetPositionAsync(Position position, int value,
-            MotionType type = MotionType.JOINT)
+            MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.PutPosition(position, value, type);
+            var response = await _connection.PutPosition(position, value, type, maxVelocity);
 
             switch (response.StatusCode)
             {
@@ -509,9 +529,9 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> SetPositionAsync(int value, MotionType type = MotionType.JOINT)
+        public async Task<string> SetPositionAsync(int value, MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.PutPosition(Position, value, type);
+            var response = await _connection.PutPosition(Position, value, type, maxVelocity);
 
             switch (response.StatusCode)
             {
@@ -524,9 +544,10 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> RunPositionsAsync(double[][] positions, int value, MotionType type = MotionType.JOINT)
+        public async Task<string> RunPositionsAsync(double[][] positions, int value, 
+            MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.RunPositions(positions, value, type);
+            var response = await _connection.RunPositions(positions, value, type, maxVelocity);
 
             switch (response.StatusCode)
             {
@@ -541,9 +562,9 @@ namespace RozumConnectionLib
         }
 
         public async Task<string> RunPositionsAsync(IEnumerable<Position> positions, int value,
-            MotionType type = MotionType.JOINT)
+            MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.RunPositions(positions, value, type);            
+            var response = await _connection.RunPositions(positions, value, type, maxVelocity);            
 
             switch (response.StatusCode)
             {
@@ -557,9 +578,10 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> RunPosesAsync(double[][] angles, int value)
+        public async Task<string> RunPosesAsync(double[][] angles, int value,
+            MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.RunPoses(angles, value);            
+            var response = await _connection.RunPoses(angles, value, type, maxVelocity);            
 
             switch (response.StatusCode)
             {
@@ -573,9 +595,10 @@ namespace RozumConnectionLib
             }
         }
        
-        public async Task<string> RunPosesAsync(IEnumerable<Pose> poses, int value)
+        public async Task<string> RunPosesAsync(IEnumerable<Pose> poses, int value,
+            MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.RunPoses(poses, value);            
+            var response = await _connection.RunPoses(poses, value, type, maxVelocity);            
 
             switch (response.StatusCode)
             {
