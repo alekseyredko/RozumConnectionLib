@@ -15,12 +15,19 @@ namespace RozumConnectionLib
 
         private string _url;
 
+        public RealRobot(string ip, int port = 8080)
+        {
+            Status = RobotStatusMotion.ERROR;
+            InitValues();
+            Port = port;
+            InitConnection(ip, port);
+        }
+
         public RealRobot(string ip)
         {
             Status = RobotStatusMotion.ERROR;
-            InitConnection(ip);
-
             InitValues();
+            InitConnection(ip, Port);            
         }
 
         public RealRobot()
@@ -41,9 +48,22 @@ namespace RozumConnectionLib
             set
             {
                 _url = value;
-                InitConnection(value);
+                InitConnection(value, Port);
             }
         }
+
+        private int _port;
+
+        public int Port
+        {
+            get { return _port; }
+            set
+            {
+                _port = value;
+                InitConnection(URL, value);
+            }
+        }
+
 
         public MotorStatus MotorStatus { get; protected set; }
 
@@ -58,6 +78,7 @@ namespace RozumConnectionLib
         private void InitValues()
         {
             ID = "";
+            Port = 8080;
             Tool = new Gripper();
             InputPorts = new bool[4];
             OutputPorts = new bool[2];
@@ -67,18 +88,16 @@ namespace RozumConnectionLib
             MotorStatus = new MotorStatus();
         }
 
-        private void InitConnection(string ip)
+        private void InitConnection(string ip, int port)
         {
             if (IPAddress.TryParse(ip, out var iP))
             {
-                _connection = new RozumConnection($"http://{ip}:8081/");
-                //GetStatusMotionAsync().Wait(2000);               
-                //IsConnected = Status != RobotStatusMotion.ERROR;
+                _connection = new RozumConnection($"http://{ip}:{port}/");                
                 IsConnected = true;
             }
             else
             {
-                _connection = new RozumConnection(URL);
+                _connection = new RozumConnection($"http://{ip}:{port}/");
                 IsConnected = false;
             }
         }
@@ -473,8 +492,7 @@ namespace RozumConnectionLib
                     return "Robot does not respond";
             }
         }
-
-        //при недостижимой позиции код ошибки равен 500
+       
         public async Task<string> SetPositionAsync(IEnumerable<double> position, int value,
             MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
