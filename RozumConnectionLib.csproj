@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.1.1</Version>
+    <Version>1.2.1</Version>
     <Company>SavushkinProduct</Company>
     <Description>A simple C# wrapper using REST API for Rozum robots</Description>
     <Authors>Aleksey Redko</Authors>
