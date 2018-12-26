@@ -318,13 +318,8 @@ namespace RozumConnectionLib
         public async Task<HttpResponseMessage> OpenGripper(int timeout)
         {
             try
-            {
-                var obj = JsonConvert.SerializeObject(new Dictionary<string, int> {{"timeout", timeout}});
-                var content = new StringContent(
-                    obj, 
-                    Encoding.UTF8,
-                    "application/json");
-                return await client.PutAsync(URL + "gripper/open", content);
+            {                
+                return await client.PutAsync(URL + $"gripper/open?timeout={timeout}", null);
             }
             catch (HttpRequestException)
             {
@@ -335,13 +330,8 @@ namespace RozumConnectionLib
         public async Task<HttpResponseMessage> CloseGripper(int timeout)
         {
             try
-            {
-                var obj = JsonConvert.SerializeObject(new Dictionary<string, int> { { "timeout", timeout } });
-                var content = new StringContent(
-                    obj,
-                    Encoding.UTF8,
-                    "application/json");
-                return await client.PutAsync(URL + "gripper/close", content);
+            {                
+                return await client.PutAsync(URL + $"gripper/close?timeout={timeout}", null);
             }
             catch (HttpRequestException)
             {
