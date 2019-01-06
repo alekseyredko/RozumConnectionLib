@@ -473,8 +473,7 @@ namespace RozumConnectionLib
                     return "Robot does not respond";
             }
         }
-
-        //при недостижимой позиции код ошибки равен 500
+        
         public async Task<string> SetPositionAsync(IEnumerable<double> position, int value,
             MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
