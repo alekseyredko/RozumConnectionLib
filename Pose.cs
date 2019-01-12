@@ -40,6 +40,11 @@ namespace RozumConnectionLib
             }
         }
 
+        public double[] ToArray()
+        {
+            return _angles;
+        }
+
         public override string ToString()
         {
             return string.Join(", ", _angles);

@@ -41,6 +41,14 @@ namespace RozumConnectionLib
 
         public Rotation(){}
 
+        public Rotation(IEnumerable<double> rotation)
+        {
+            var enumerable = rotation as double[] ?? rotation.ToArray();
+            Roll = enumerable.ElementAt(0);
+            Pitch = enumerable.ElementAt(1);
+            Yaw = enumerable.ElementAt(2);
+        }
+
         public Rotation(SerializationInfo info, StreamingContext context)
         {
             Roll = info.GetDouble("roll");

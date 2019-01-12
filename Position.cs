@@ -27,6 +27,13 @@ namespace RozumConnectionLib
             }
         }
 
+        public Position(IEnumerable<double> position)
+        {
+            var enumerable = position as double[] ?? position.ToArray();
+            Point = new Point(enumerable.Take(3));
+            Rotation = new Rotation(enumerable.Skip(3));
+        }
+
         public Position()
         {
             Point = new Point();

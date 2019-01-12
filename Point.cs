@@ -41,6 +41,14 @@ namespace RozumConnectionLib
 
         public Point(){}
 
+        public Point(IEnumerable<double> point)
+        {
+            var enumerable = point as double[] ?? point.ToArray();
+            X = enumerable.ElementAt(0);
+            Y = enumerable.ElementAt(1);
+            Z = enumerable.ElementAt(2);
+        }
+
         public Point(SerializationInfo info, StreamingContext context)
         {
             X = info.GetDouble("x");
