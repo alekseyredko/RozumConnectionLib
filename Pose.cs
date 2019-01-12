@@ -1,23 +1,21 @@
-﻿using System;
+﻿using SQLite;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RozumConnectionLib
 {
     [Serializable]
     public class Pose: ISerializable
     {
-        [Key]
+        [PrimaryKey, AutoIncrement, Unique]
         public int Id { get; set; }
 
-        [NotMapped]
+        
         private double[] _angles;
-        [NotMapped]
+
+        [Ignore]
         public IEnumerable<double> Angles
         {
             get => _angles;

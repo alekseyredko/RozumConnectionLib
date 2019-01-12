@@ -1,22 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.Serialization;
+using SQLite;
 
 namespace RozumConnectionLib
 {
     [Serializable]
     public class Point: ISerializable
     {
-        [Key]
+        [PrimaryKey, AutoIncrement, Unique]
         public int Id { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
-
-        [NotMapped]
+        [Ignore]
         public IEnumerable<double> Coordinate
         {
             get => new[] {X, Y, Z};

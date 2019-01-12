@@ -1,24 +1,21 @@
-﻿using System;
+﻿using SQLite;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RozumConnectionLib
 {
     [Serializable]
     public class Rotation:ISerializable
     {
-        [Key]
+        [PrimaryKey, AutoIncrement, Unique]
         public int Id { get; set; }
         public double Roll { get; set; }
         public double Pitch { get; set; }
         public double Yaw { get; set; }
 
-        [NotMapped]
+        [Ignore]
         public IEnumerable<double> Angles
         {
             get => new[] {Roll, Pitch, Yaw};
