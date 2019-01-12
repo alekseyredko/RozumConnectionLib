@@ -8,25 +8,10 @@ namespace RozumConnectionLib
 {
     [Serializable]
     public class Rotation:ISerializable
-    {
-        [PrimaryKey, AutoIncrement, Unique]
-        public int Id { get; set; }
+    {       
         public double Roll { get; set; }
         public double Pitch { get; set; }
-        public double Yaw { get; set; }
-
-        [Ignore]
-        public IEnumerable<double> Angles
-        {
-            get => new[] {Roll, Pitch, Yaw};
-            set
-            {
-                if(value.Count()!=3) return;
-                Roll = value.ElementAt(0);
-                Pitch = value.ElementAt(1);
-                Yaw = value.ElementAt(2);
-            }
-        }
+        public double Yaw { get; set; }       
 
         public double this[int index]
         {
@@ -58,10 +43,9 @@ namespace RozumConnectionLib
 
         public Rotation(SerializationInfo info, StreamingContext context)
         {
-            Angles = new List<double>
-            {
-                info.GetDouble("roll"), info.GetDouble("pitch"), info.GetDouble("yaw")
-            };
+            Roll = info.GetDouble("roll");
+            Pitch = info.GetDouble("pitch");
+            Yaw = info.GetDouble("yaw");            
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
