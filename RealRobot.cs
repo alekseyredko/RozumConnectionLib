@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -12,6 +11,8 @@ namespace RozumConnectionLib
     public class RealRobot : Robot
     {
         private RozumConnection _connection;
+
+        private int _port;
 
         private string _url;
 
@@ -27,7 +28,7 @@ namespace RozumConnectionLib
         {
             Status = RobotStatusMotion.ERROR;
             InitValues();
-            InitConnection(ip, Port);            
+            InitConnection(ip, Port);
         }
 
         public RealRobot()
@@ -52,11 +53,9 @@ namespace RozumConnectionLib
             }
         }
 
-        private int _port;
-
         public int Port
         {
-            get { return _port; }
+            get => _port;
             set
             {
                 _port = value;
@@ -92,7 +91,7 @@ namespace RozumConnectionLib
         {
             if (IPAddress.TryParse(ip, out var iP))
             {
-                _connection = new RozumConnection($"http://{ip}:{port}/");                
+                _connection = new RozumConnection($"http://{ip}:{port}/");
                 IsConnected = true;
             }
             else
@@ -122,8 +121,8 @@ namespace RozumConnectionLib
         {
             var response = GetDigitalInputAsync(port).Result;
             var result = state ? "HIGH" : "LOW";
-            if (response == "Robot does not respond") return;            
-            while (response!=result)
+            if (response == "Robot does not respond") return;
+            while (response != result)
             {
                 response = GetDigitalInputAsync(port).Result;
                 Thread.Sleep(askPeriod);
@@ -134,8 +133,8 @@ namespace RozumConnectionLib
         {
             var response = await GetDigitalInputAsync(port);
             var result = state ? "HIGH" : "LOW";
-            if (response == "Robot does not respond") return;            
-            while (response!=result)
+            if (response == "Robot does not respond") return;
+            while (response != result)
             {
                 response = await GetDigitalInputAsync(port);
                 Thread.Sleep(askPeriod);
@@ -146,8 +145,8 @@ namespace RozumConnectionLib
         {
             var response = GetDigitalOutputAsync(port).Result;
             var result = state ? "HIGH" : "LOW";
-            if (response == "Robot does not respond") return; 
-            while (response!=result)
+            if (response == "Robot does not respond") return;
+            while (response != result)
             {
                 response = GetDigitalInputAsync(port).Result;
                 Thread.Sleep(askPeriod);
@@ -158,8 +157,8 @@ namespace RozumConnectionLib
         {
             var response = await GetDigitalOutputAsync(port);
             var result = state ? "HIGH" : "LOW";
-            if (response == "Robot does not respond") return; 
-            while (response!=result)
+            if (response == "Robot does not respond") return;
+            while (response != result)
             {
                 response = await GetDigitalInputAsync(port);
                 Thread.Sleep(askPeriod);
@@ -185,7 +184,7 @@ namespace RozumConnectionLib
 
         public async Task<string> GetStatusMotionAsync()
         {
-            var response = await _connection.GetStatusMotionStr();            
+            var response = await _connection.GetStatusMotionStr();
 
             switch (response)
             {
@@ -209,10 +208,10 @@ namespace RozumConnectionLib
                     return "Robot does not respond";
             }
         }
-        
+
         public string GetStatusMotion()
         {
-            var response = _connection.GetStatusMotionStr().Result;            
+            var response = _connection.GetStatusMotionStr().Result;
 
             switch (response)
             {
@@ -235,11 +234,11 @@ namespace RozumConnectionLib
                     Status = RobotStatusMotion.ERROR;
                     return "Robot does not respond";
             }
-        }       
+        }
 
         public async Task<string> GetMotorStatusAsync()
         {
-            var response = await _connection.GetMotorStatus();            
+            var response = await _connection.GetMotorStatus();
 
             if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
 
@@ -248,17 +247,16 @@ namespace RozumConnectionLib
 
             return "OK";
         }
-        
+
         public override async Task<string> GetPoseAsync()
         {
             var response = await _connection.GetPose();
 
             if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
             var content = await response.Content.ReadAsStringAsync();
-            JointAngles = JsonConvert.DeserializeObject<Pose>(content);           
+            JointAngles = JsonConvert.DeserializeObject<Pose>(content);
             IsConnected = true;
             return "OK";
-
         }
 
         public override async Task<string> GetPositionAsync()
@@ -492,7 +490,7 @@ namespace RozumConnectionLib
                     return "Robot does not respond";
             }
         }
-       
+
         public async Task<string> SetPositionAsync(IEnumerable<double> position, int value,
             MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
@@ -544,7 +542,7 @@ namespace RozumConnectionLib
             }
         }
 
-        public async Task<string> RunPositionsAsync(double[][] positions, int value, 
+        public async Task<string> RunPositionsAsync(double[][] positions, int value,
             MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
             var response = await _connection.RunPositions(positions, value, type, maxVelocity);
@@ -564,7 +562,7 @@ namespace RozumConnectionLib
         public async Task<string> RunPositionsAsync(IEnumerable<Position> positions, int value,
             MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.RunPositions(positions, value, type, maxVelocity);            
+            var response = await _connection.RunPositions(positions, value, type, maxVelocity);
 
             switch (response.StatusCode)
             {
@@ -581,7 +579,7 @@ namespace RozumConnectionLib
         public async Task<string> RunPosesAsync(double[][] angles, int value,
             MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.RunPoses(angles, value, type, maxVelocity);            
+            var response = await _connection.RunPoses(angles, value, type, maxVelocity);
 
             switch (response.StatusCode)
             {
@@ -594,11 +592,11 @@ namespace RozumConnectionLib
                     return "Robot does not respond";
             }
         }
-       
+
         public async Task<string> RunPosesAsync(IEnumerable<Pose> poses, int value,
             MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.RunPoses(poses, value, type, maxVelocity);            
+            var response = await _connection.RunPoses(poses, value, type, maxVelocity);
 
             switch (response.StatusCode)
             {
@@ -614,17 +612,17 @@ namespace RozumConnectionLib
 
         public async Task<string> OpenGripperAsync(int timeout = 500)
         {
-            var response = await _connection.OpenGripper(timeout);            
+            var response = await _connection.OpenGripper(timeout);
 
             if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
             IsGripperOpened = true;
             return "Tool opened";
         }
-        
+
         public async Task<string> CloseGripperAsync(int timeout = 500)
         {
             var response = await _connection.CloseGripper(timeout);
-            
+
             if (response.StatusCode != HttpStatusCode.OK) return "Robot does not respond";
             IsGripperOpened = false;
             return "Tool closed";
@@ -634,21 +632,21 @@ namespace RozumConnectionLib
         {
             var result = GetStatusMotionAsync().Result;
             if (result != "RUNNING" && result != "IDLE") return;
-            
-            while (result !="IDLE")
-            {               
+
+            while (result != "IDLE")
+            {
                 Thread.Sleep(askingPeriod);
                 result = GetStatusMotionAsync().Result;
             }
         }
-        
+
         public async Task WaitMotionAsync(int askingPeriod = 50)
         {
             var result = await GetStatusMotionAsync();
             if (result != "RUNNING" && result != "IDLE") return;
-            
-            while (result !="IDLE")
-            {               
+
+            while (result != "IDLE")
+            {
                 Thread.Sleep(askingPeriod);
                 result = await GetStatusMotionAsync();
             }
