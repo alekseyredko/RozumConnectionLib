@@ -2,29 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using SQLite;
 
 namespace RozumConnectionLib
 {
     [Serializable]
     public class Position: ISerializable
-    {
-        [PrimaryKey, AutoIncrement, Unique]
-        public int Id { get; set; }        
+    { 
         public Point Point { get; set; }
-        public Rotation Rotation { get; set; }
-
-        [Ignore]
-        public IEnumerable<double> Array
-        {
-            get => Point.Coordinate.Concat(Rotation.Angles);
-            set
-            {
-                if(value.Count()!=6) return;
-                Point = new Point {Coordinate = value.Take(3)};
-                Rotation = new Rotation {Angles = value.Skip(3)};
-            }
-        }
+        public Rotation Rotation { get; set; }       
 
         public double this[int index]
         {
@@ -40,6 +25,13 @@ namespace RozumConnectionLib
                 if (index >= 0 && index <= 2) Point[index] = value;
                 else Rotation[index] = value;
             }
+        }
+
+        public Position(IEnumerable<double> position)
+        {
+            var enumerable = position as double[] ?? position.ToArray();
+            Point = new Point(enumerable.Take(3));
+            Rotation = new Rotation(enumerable.Skip(3));
         }
 
         public Position()
@@ -69,7 +61,7 @@ namespace RozumConnectionLib
 
         public double[] ToArray()
         {
-            return Point.Coordinate.Concat(Rotation.Angles).ToArray();
+            return Point.ToArray().Concat(Rotation.ToArray()).ToArray();
         }
     }
 }

@@ -319,7 +319,7 @@ namespace RozumConnectionLib
             switch (response.StatusCode)
             {
                 case HttpStatusCode.OK:
-                    BasePosition.Array = position;
+                    BasePosition = new Position(position);
                     return "OK";
                 case HttpStatusCode.PreconditionFailed:
                     return await response.Content.ReadAsStringAsync();
@@ -469,7 +469,7 @@ namespace RozumConnectionLib
             switch (response.StatusCode)
             {
                 case HttpStatusCode.OK:
-                    JointAngles.Angles = angles;
+                    JointAngles = new Pose(angles);
                     return "OK";
                 case HttpStatusCode.PreconditionFailed:
                     return await response.Content.ReadAsStringAsync();
@@ -480,7 +480,7 @@ namespace RozumConnectionLib
 
         public async Task<string> SetPoseAsync(int value, MotionType type = MotionType.JOINT, float maxVelocity = 2)
         {
-            var response = await _connection.PutPose(JointAngles.Angles, value, type, maxVelocity);
+            var response = await _connection.PutPose(JointAngles.ToArray(), value, type, maxVelocity);
 
             switch (response.StatusCode)
             {
@@ -501,7 +501,7 @@ namespace RozumConnectionLib
             switch (response.StatusCode)
             {
                 case HttpStatusCode.OK:
-                    Position.Array = position;
+                    Position = new Position(position);
                     return "OK";
                 case HttpStatusCode.PreconditionFailed:
                     return await response.Content.ReadAsStringAsync();
@@ -552,7 +552,7 @@ namespace RozumConnectionLib
             switch (response.StatusCode)
             {
                 case HttpStatusCode.OK:
-                    Position.Array = positions.Last();
+                    Position = new Position(positions.Last());
                     return "OK";
                 case HttpStatusCode.PreconditionFailed:
                     return await response.Content.ReadAsStringAsync();
@@ -586,7 +586,7 @@ namespace RozumConnectionLib
             switch (response.StatusCode)
             {
                 case HttpStatusCode.OK:
-                    JointAngles.Angles = angles.Last();
+                    JointAngles = new Pose(angles.Last());
                     return "OK";
                 case HttpStatusCode.PreconditionFailed:
                     return await response.Content.ReadAsStringAsync();

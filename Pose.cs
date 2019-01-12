@@ -8,20 +8,9 @@ namespace RozumConnectionLib
 {
     [Serializable]
     public class Pose: ISerializable
-    {
-        [PrimaryKey, AutoIncrement, Unique]
-        public int Id { get; set; }
-
-        
+    {        
         private double[] _angles;
-
-        [Ignore]
-        public IEnumerable<double> Angles
-        {
-            get => _angles;
-            set => _angles = value.ToArray();
-        }
-
+             
         public Pose()
         {
             _angles = new double[6];
@@ -29,12 +18,12 @@ namespace RozumConnectionLib
 
         public Pose(IEnumerable<double> angles)
         {
-            Angles = angles;
+            _angles = angles.ToArray();
         }
 
         public Pose(SerializationInfo info, StreamingContext context)
         {
-            Angles = info.GetValue("angles", typeof(IEnumerable<double>)) as IEnumerable<double>;
+            _angles = info.GetValue("angles", typeof(double[])) as double[];
         }
 
         public double this[int index]
@@ -51,9 +40,14 @@ namespace RozumConnectionLib
             }
         }
 
+        public double[] ToArray()
+        {
+            return _angles;
+        }
+
         public override string ToString()
         {
-            return string.Join(", ", Angles);
+            return string.Join(", ", _angles);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)

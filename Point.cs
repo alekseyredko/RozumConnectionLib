@@ -9,24 +9,10 @@ namespace RozumConnectionLib
     [Serializable]
     public class Point: ISerializable
     {
-        [PrimaryKey, AutoIncrement, Unique]
-        public int Id { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
-        [Ignore]
-        public IEnumerable<double> Coordinate
-        {
-            get => new[] {X, Y, Z};
-            set
-            {
-                if (value.Count() != 3) return;
-                X = value.ElementAt(0);
-                Y = value.ElementAt(1);
-                Z = value.ElementAt(2);
-            }
-        }
-
+       
         public double this[int index]
         {
             get
@@ -55,12 +41,19 @@ namespace RozumConnectionLib
 
         public Point(){}
 
+        public Point(IEnumerable<double> point)
+        {
+            var enumerable = point as double[] ?? point.ToArray();
+            X = enumerable.ElementAt(0);
+            Y = enumerable.ElementAt(1);
+            Z = enumerable.ElementAt(2);
+        }
+
         public Point(SerializationInfo info, StreamingContext context)
         {
-            Coordinate = new List<double>
-            {
-                info.GetDouble("x"), info.GetDouble("y"), info.GetDouble("z")
-            };
+            X = info.GetDouble("x");
+            Y = info.GetDouble("y");
+            Z = info.GetDouble("z");           
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
