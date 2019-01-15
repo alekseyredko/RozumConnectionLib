@@ -1,5 +1,4 @@
-﻿using SQLite;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -9,55 +8,53 @@ namespace RozumConnectionLib
     [Serializable]
     public class Pose: ISerializable
     {        
-        private double[] _angles;
+        public List<double> Angles;
 
-        [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
         public string Name { get; set; }
 
         public Pose()
         {
-            _angles = new double[6];
+            Angles = new List<double>();
         }
 
         public Pose(IEnumerable<double> angles)
         {
-            _angles = angles.ToArray();
+            Angles = angles.ToList();
         }
 
         public Pose(SerializationInfo info, StreamingContext context)
         {
-            _angles = info.GetValue("angles", typeof(double[])) as double[];
+            Angles = info.GetValue("angles", typeof(List<double>)) as List<double>;
         }
 
-        [Ignore]
         public double this[int index]
         {
             get
             {
                 if(index<0 && index>5) throw new IndexOutOfRangeException();
-                return _angles[index];
+                return Angles[index];
             }
             set
             {
                 if (index < 0 && index > 5) throw new IndexOutOfRangeException();
-                _angles[index] = value;
+                Angles[index] = value;
             }
         }
 
         public double[] ToArray()
         {
-            return _angles;
+            return Angles.ToArray();
         }
 
         public override string ToString()
         {
-            return string.Join(", ", _angles);
+            return string.Join(", ", Angles);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("angles", _angles);
+            info.AddValue("angles", Angles);
         }
     }
 }

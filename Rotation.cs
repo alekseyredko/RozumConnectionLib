@@ -1,21 +1,18 @@
-﻿using SQLite;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using SQLiteNetExtensions.Attributes;
 
 namespace RozumConnectionLib
 {
     [Serializable]
     public class Rotation:ISerializable
-    {
-        [PrimaryKey, AutoIncrement]
+    {        
         public int Id { get; set; }
         public double Roll { get; set; }
         public double Pitch { get; set; }
         public double Yaw { get; set; }
-        [Ignore]
+       
         public double this[int index]
         {
             get
