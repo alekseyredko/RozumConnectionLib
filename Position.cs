@@ -7,10 +7,12 @@ namespace RozumConnectionLib
 {
     [Serializable]
     public class Position: ISerializable
-    {        
+    {
+        [IgnoreDataMember]
         public int Id { get; set; }            
         public Point Point { get; set; }
-        public Rotation Rotation { get; set; }       
+        public Rotation Rotation { get; set; }
+        [IgnoreDataMember]
         public string Name { get; set; }
         public double this[int index]
         {

@@ -10,7 +10,9 @@ namespace RozumConnectionLib
     {        
         public List<double> Angles;
 
+        [IgnoreDataMember]
         public int Id { get; set; }
+        [IgnoreDataMember]
         public string Name { get; set; }
 
         public Pose()

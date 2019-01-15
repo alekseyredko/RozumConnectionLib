@@ -26,7 +26,8 @@ namespace RozumConnectionLib
         public string Name { get; set; }
 
         public double Radius { get; set; }
-        
+
+        [IgnoreDataMember]
         public int Id { get; set; }        
         
         public Point Point { get; set; }

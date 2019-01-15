@@ -16,7 +16,7 @@ namespace RozumConnectionLib
 
         private string _url;
 
-        public RealRobot(string ip, int port = 8080)
+        public RealRobot(string ip, int port = 8081)
         {
             Status = RobotStatusMotion.ERROR;
             InitValues();
