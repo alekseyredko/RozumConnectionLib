@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using SQLite;
+using SQLiteNetExtensions.Attributes;
+using System;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RozumConnectionLib
 {
@@ -30,8 +28,15 @@ namespace RozumConnectionLib
 
         public double Radius { get; set; }
 
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+        [ForeignKey(typeof(Point))]
+        public int PointKey { get; set; }
+        [ForeignKey(typeof(Rotation))]
+        public int RotationKey { get; set; }
+        [OneToOne(CascadeOperations = CascadeOperation.All)]
         public Point Point { get; set; }
-
+        [OneToOne(CascadeOperations = CascadeOperation.All)]
         public Rotation Rotation { get; set; }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)

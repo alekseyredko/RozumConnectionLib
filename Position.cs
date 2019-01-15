@@ -2,15 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using SQLite;
+using SQLiteNetExtensions.Attributes;
 
 namespace RozumConnectionLib
 {
     [Serializable]
     public class Position: ISerializable
-    { 
+    {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }    
+        [ForeignKey(typeof(Point))]
+        public int PointKey { get; set; }
+        [ForeignKey(typeof(Rotation))]
+        public int RotationKey { get; set; }
+        [OneToOne(CascadeOperations = CascadeOperation.All)]
         public Point Point { get; set; }
+        [OneToOne(CascadeOperations = CascadeOperation.All)]
         public Rotation Rotation { get; set; }       
-
+        public string Name { get; set; }
+        [Ignore]
         public double this[int index]
         {
             get

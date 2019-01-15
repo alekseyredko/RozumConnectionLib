@@ -10,7 +10,11 @@ namespace RozumConnectionLib
     public class Pose: ISerializable
     {        
         private double[] _angles;
-             
+
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+        public string Name { get; set; }
+
         public Pose()
         {
             _angles = new double[6];
@@ -26,6 +30,7 @@ namespace RozumConnectionLib
             _angles = info.GetValue("angles", typeof(double[])) as double[];
         }
 
+        [Ignore]
         public double this[int index]
         {
             get

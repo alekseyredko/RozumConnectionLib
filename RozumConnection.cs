@@ -187,7 +187,7 @@ namespace RozumConnectionLib
         {
             try
             {
-                var pos = new Position{Array = position};
+                var pos = new Position(position);
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(pos),
                     Encoding.UTF8, "application/json");
@@ -227,7 +227,7 @@ namespace RozumConnectionLib
             try
             {              
                 var httpContent = new StringContent(
-                    JsonConvert.SerializeObject(new Position{Array = position}),
+                    JsonConvert.SerializeObject(new Position(position)),
                     Encoding.UTF8, "application/json");
                 return await client.PostAsync(URL + $"base", httpContent);
             }
@@ -393,7 +393,7 @@ namespace RozumConnectionLib
 
                 for (int i = 0; i < positions.GetLength(0); i++)
                 {
-                    list.Add(new Position{Array = positions[i]});                   
+                    list.Add(new Position(positions[i]));                   
                 }
 
                 var httpContent = new StringContent(

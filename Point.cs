@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using SQLite;
+using SQLiteNetExtensions.Attributes;
 
 namespace RozumConnectionLib
 {
     [Serializable]
     public class Point: ISerializable
     {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
-       
+        [Ignore]
         public double this[int index]
         {
             get
