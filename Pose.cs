@@ -9,7 +9,7 @@ namespace RozumConnectionLib
     public class Pose: ISerializable
     {        
         public List<double> Angles;
-
+       
         public int Id { get; set; }
         public string Name { get; set; }
 

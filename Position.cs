@@ -10,7 +10,7 @@ namespace RozumConnectionLib
     {        
         public int Id { get; set; }            
         public Point Point { get; set; }
-        public Rotation Rotation { get; set; }       
+        public Rotation Rotation { get; set; }
         public string Name { get; set; }
         public double this[int index]
         {
