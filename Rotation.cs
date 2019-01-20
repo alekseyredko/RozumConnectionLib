@@ -7,7 +7,8 @@ namespace RozumConnectionLib
 {
     [Serializable]
     public class Rotation:ISerializable
-    {        
+    {
+        [IgnoreDataMember]
         public int Id { get; set; }
         public double Roll { get; set; }
         public double Pitch { get; set; }

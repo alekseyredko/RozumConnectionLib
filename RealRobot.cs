@@ -24,13 +24,6 @@ namespace RozumConnectionLib
             InitConnection(ip, port);
         }
 
-        public RealRobot(string ip)
-        {
-            Status = RobotStatusMotion.ERROR;
-            InitValues();
-            InitConnection(ip, Port);
-        }
-
         public RealRobot()
         {
             Status = RobotStatusMotion.ERROR;
