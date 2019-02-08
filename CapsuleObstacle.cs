@@ -7,6 +7,8 @@ namespace RozumConnectionLib
 {
     public class Obstacle
     {
+        [JsonIgnore]
+        public int Id { get; set; }
         [JsonProperty("obstacle_type")]
         public string ObstacleType { get; set; }
         [JsonProperty("name")]

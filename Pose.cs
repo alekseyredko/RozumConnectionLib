@@ -1,4 +1,4 @@
-﻿using SQLite;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +9,8 @@ namespace RozumConnectionLib
 {
     public class Pose
     {
+        [JsonIgnore]
+        public int Id { get; set; }
         [JsonProperty("angles")]
         public List<double> Angles;
              

@@ -8,7 +8,9 @@ using Newtonsoft.Json.Serialization;
 namespace RozumConnectionLib
 {
     public class Position
-    { 
+    {
+        [JsonIgnore]
+        public int Id { get; set; }
         [JsonProperty("point")]
         public Point Point { get; set; }
         [JsonProperty("rotation")]

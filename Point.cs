@@ -9,6 +9,8 @@ namespace RozumConnectionLib
 {
     public class Point
     {
+        [JsonIgnore]
+        public int Id { get; set; }
         [JsonProperty("x")]
         public double X { get; set; }
         [JsonProperty("y")]

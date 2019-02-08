@@ -7,6 +7,8 @@ namespace RozumConnectionLib
 {
     public class MotorStatus
     {
+        [JsonIgnore]
+        public int Id { get; set; }
         [JsonProperty("joints")]
         public IEnumerable<JointStatus> Joints { get; set; }
 
@@ -26,6 +28,8 @@ namespace RozumConnectionLib
 
     public class JointStatus
     {
+        [JsonIgnore]
+        public int Id { get; set; }
         public JointStatus()
         {
         }

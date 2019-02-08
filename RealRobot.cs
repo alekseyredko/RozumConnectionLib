@@ -10,6 +10,8 @@ namespace RozumConnectionLib
 {
     public class RealRobot : Robot
     {
+        [JsonIgnore]
+        public int Id { get; set; }
         private RozumConnection _connection;
 
         private int _port;

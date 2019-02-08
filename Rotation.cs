@@ -1,5 +1,4 @@
-﻿using SQLite;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -9,6 +8,8 @@ namespace RozumConnectionLib
 {
     public class Rotation
     {
+        [JsonIgnore]
+        public int Id { get; set; }
         [JsonProperty("roll")]
         public double Roll { get; set; }
         [JsonProperty("pitch")]
