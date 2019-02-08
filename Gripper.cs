@@ -10,6 +10,8 @@ namespace RozumConnectionLib
 {
     public class Gripper
     {
+        [JsonIgnore]
+        public int Id { get; set; }
         [JsonProperty("name")]
         public string Name { get; set; }
         [JsonProperty("tcp")]
