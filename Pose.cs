@@ -10,6 +10,8 @@ namespace RozumConnectionLib
     public class Pose
     {
         [JsonIgnore]
+        public string Name { get; set; }
+        [JsonIgnore]
         public int Id { get; set; }
         [JsonProperty("angles")]
         public List<double> Angles;

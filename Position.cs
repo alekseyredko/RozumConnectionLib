@@ -10,6 +10,8 @@ namespace RozumConnectionLib
     public class Position
     {
         [JsonIgnore]
+        public string Name { get; set; }
+        [JsonIgnore]
         public int Id { get; set; }
         [JsonProperty("point")]
         public Point Point { get; set; }

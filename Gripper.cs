@@ -21,7 +21,7 @@ namespace RozumConnectionLib
         [JsonProperty("rotation")]
         public Rotation Rotation { get; set; }
         [JsonProperty("shape")]
-        public Obstacle Shape { get; set; }
+        public List<Obstacle> Shape { get; set; }
 
         public override string ToString()
         {
