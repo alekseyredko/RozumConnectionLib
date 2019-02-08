@@ -1,54 +1,29 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace RozumConnectionLib
 {
-    [Serializable]
-    public class Gripper: ISerializable
-    {      
-        public Gripper()
-        {
-            Name = "";
-            Radius = 0;
-            Point = new Point();
-            Rotation = new Rotation();
-        }
-
-        public Gripper(SerializationInfo info, StreamingContext context)
-        {
-            Name = info.GetString("name");
-            Radius = info.GetDouble("radius");
-            Point = (Point)info.GetValue("point", typeof(Point));
-            Rotation = (Rotation) info.GetValue("rotation", typeof(Rotation));
-            Shape = (Shape)info.GetValue("shape", typeof(Shape));
-        }
-
+    public class Gripper
+    {
+        [JsonProperty("name")]
         public string Name { get; set; }
-
+        [JsonProperty("radius")]
         public double Radius { get; set; }
-
-        [IgnoreDataMember]
-        public int Id { get; set; }        
-        
+        [JsonProperty("point")]
         public Point Point { get; set; }
-        
+        [JsonProperty("rotation")]
         public Rotation Rotation { get; set; }
-
-        public Shape Shape { get; set; }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("name", Name);
-            info.AddValue("point", Point);
-            info.AddValue("rotation", Rotation);
-            info.AddValue("radius", Radius);
-            info.AddValue("shape", Radius);
-        }
+        [JsonProperty("shape")]
+        public Obstacle Shape { get; set; }
 
         public override string ToString()
         {
-            return $"Name: {Name}; Point: {Point}; Rotation: {Rotation}; Radius: {Radius};";
+            return $"Name: {Name}; Point: {Point}; Rotation: {Rotation}; Radius: {Radius}; Shape: {Shape}";
         }
     }
 }

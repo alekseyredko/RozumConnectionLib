@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace RozumConnectionLib
 {
-    [Serializable]
-    public class Position: ISerializable
-    {        
-        public int Id { get; set; }            
+    public class Position
+    { 
+        [JsonProperty("point")]
         public Point Point { get; set; }
-        public Rotation Rotation { get; set; }
-        public string Name { get; set; }
+        [JsonProperty("rotation")]
+        public Rotation Rotation { get; set; }       
+
         public double this[int index]
         {
             get
@@ -40,24 +42,10 @@ namespace RozumConnectionLib
             Point = new Point();
             Rotation = new Rotation();
         }
-
-        public Position(SerializationInfo info, StreamingContext context)
-        {
-            var point = (Point)info.GetValue("point", typeof(Point));
-            var rotation = (Rotation)info.GetValue("rotation", typeof(Rotation));
-            Point = point;
-            Rotation = rotation;
-        }
-
+       
         public override string ToString()
         {
             return $"Point: {Point}; Rotation: {Rotation};";
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("point", Point);
-            info.AddValue("rotation", Rotation);
         }
 
         public double[] ToArray()

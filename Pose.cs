@@ -1,18 +1,17 @@
-﻿using System;
+﻿using SQLite;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace RozumConnectionLib
 {
-    [Serializable]
-    public class Pose: ISerializable
-    {        
+    public class Pose
+    {
+        [JsonProperty("angles")]
         public List<double> Angles;
-       
-        public int Id { get; set; }
-        public string Name { get; set; }
-
+             
         public Pose()
         {
             Angles = new List<double>();
@@ -21,11 +20,6 @@ namespace RozumConnectionLib
         public Pose(IEnumerable<double> angles)
         {
             Angles = angles.ToList();
-        }
-
-        public Pose(SerializationInfo info, StreamingContext context)
-        {
-            Angles = info.GetValue("angles", typeof(List<double>)) as List<double>;
         }
 
         public double this[int index]
@@ -50,11 +44,6 @@ namespace RozumConnectionLib
         public override string ToString()
         {
             return string.Join(", ", Angles);
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("angles", Angles);
         }
     }
 }
