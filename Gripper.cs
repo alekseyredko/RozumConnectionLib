@@ -12,18 +12,10 @@ namespace RozumConnectionLib
     {
         [JsonProperty("name")]
         public string Name { get; set; }
-        [JsonProperty("radius")]
-        public double Radius { get; set; }
-        [JsonProperty("point")]
-        public Point Point { get; set; }
-        [JsonProperty("rotation")]
-        public Rotation Rotation { get; set; }
+        [JsonProperty("tcp")]
+        public Position Tcp { get; set; }
         [JsonProperty("shape")]
-        public Obstacle Shape { get; set; }
+        public List<CapsuleObstacle> Shape { get; set; }
 
-        public override string ToString()
-        {
-            return $"Name: {Name}; Point: {Point}; Rotation: {Rotation}; Radius: {Radius}; Shape: {Shape}";
-        }
     }
 }
