@@ -393,7 +393,7 @@ namespace RozumConnectionLib
 
                 for (int i = 0; i < positions.GetLength(0); i++)
                 {
-                    list.Add(new Position(position));                   
+                    list.Add(new Position(positions[i]));                   
                 }
 
                 var httpContent = new StringContent(
