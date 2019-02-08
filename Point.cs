@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 using SQLite;
 
 namespace RozumConnectionLib
 {
-    [Serializable]
-    public class Point: ISerializable
+    public class Point
     {
+        [JsonProperty("x")]
         public double X { get; set; }
+        [JsonProperty("y")]
         public double Y { get; set; }
+        [JsonProperty("z")]
         public double Z { get; set; }
        
         public double this[int index]
@@ -47,20 +50,6 @@ namespace RozumConnectionLib
             X = enumerable.ElementAt(0);
             Y = enumerable.ElementAt(1);
             Z = enumerable.ElementAt(2);
-        }
-
-        public Point(SerializationInfo info, StreamingContext context)
-        {
-            X = info.GetDouble("x");
-            Y = info.GetDouble("y");
-            Z = info.GetDouble("z");           
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("x", X);
-            info.AddValue("y", Y);
-            info.AddValue("z", Z);
         }
 
         public double[] ToArray() => new[] {X, Y, Z};

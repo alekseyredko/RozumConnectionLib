@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace RozumConnectionLib
 {
     public class MotorStatus
     {
+        [JsonProperty("joints")]
         public IEnumerable<JointStatus> Joints { get; set; }
 
         public MotorStatus()
@@ -26,21 +29,35 @@ namespace RozumConnectionLib
         public JointStatus()
         {
         }
-
-        public double Angle { get; set; }
-        public double RotorVelocity { get; set; }
-        public double RmsCurrent { get; set; }
-        public double Voltage { get; set; }
-        public double PhaseCurrent { get; set; }
-        public double StatorTemperature { get; set; }
-        public double ServoTemperature { get; set; }
-        public double VelocityError { get; set; }
-        public double VelocitySetPoint { get; set; }
-        public double VelocityFeedback { get; set; }
-        public double VelocityOutput { get; set; }
-        public double PositionError { get; set; }
-        public double PositionSetPoint { get; set; }
-        public double PositionFeedback { get; set; }
-        public double PositionOutput { get; set; }
+        [JsonProperty("angle")]
+        public float Angle { get; set; }
+        [JsonProperty("rotor_velocity")]
+        public float RotorVelocity { get; set; }
+        [JsonProperty("rms_current")]
+        public float RmsCurrent { get; set; }
+        [JsonProperty("voltage")]
+        public float Voltage { get; set; }
+        [JsonProperty("phase_current")]
+        public float PhaseCurrent { get; set; }
+        [JsonProperty("stator_temperature")]
+        public float StatorTemperature { get; set; }
+        [JsonProperty("servo_temperature")]
+        public float ServoTemperature { get; set; }
+        [JsonProperty("velocity_error")]
+        public float VelocityError { get; set; }
+        [JsonProperty("velocity_setpoint")]
+        public float VelocitySetPoint { get; set; }
+        [JsonProperty("velocity_feedback")]
+        public float VelocityFeedback { get; set; }
+        [JsonProperty("velocity_output")]
+        public float VelocityOutput { get; set; }
+        [JsonProperty("position_error")]
+        public float PositionError { get; set; }
+        [JsonProperty("position_setpoint")]
+        public float PositionSetPoint { get; set; }
+        [JsonProperty("position_feedback")]
+        public float PositionFeedback { get; set; }
+        [JsonProperty("position_output")]
+        public float PositionOutput { get; set; }
     }   
 }

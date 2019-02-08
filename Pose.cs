@@ -3,27 +3,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace RozumConnectionLib
 {
-    [Serializable]
-    public class Pose: ISerializable
-    {        
-        private double[] _angles;
+    public class Pose
+    {
+        [JsonProperty("angles")]
+        public List<double> Angles;
              
         public Pose()
         {
-            _angles = new double[6];
+            Angles = new List<double>();
         }
 
         public Pose(IEnumerable<double> angles)
         {
-            _angles = angles.ToArray();
-        }
-
-        public Pose(SerializationInfo info, StreamingContext context)
-        {
-            _angles = info.GetValue("angles", typeof(double[])) as double[];
+            Angles = angles.ToList();
         }
 
         public double this[int index]
@@ -31,28 +27,23 @@ namespace RozumConnectionLib
             get
             {
                 if(index<0 && index>5) throw new IndexOutOfRangeException();
-                return _angles[index];
+                return Angles[index];
             }
             set
             {
                 if (index < 0 && index > 5) throw new IndexOutOfRangeException();
-                _angles[index] = value;
+                Angles[index] = value;
             }
         }
 
         public double[] ToArray()
         {
-            return _angles;
+            return Angles.ToArray();
         }
 
         public override string ToString()
         {
-            return string.Join(", ", _angles);
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("angles", _angles);
+            return string.Join(", ", Angles);
         }
     }
 }

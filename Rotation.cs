@@ -3,14 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace RozumConnectionLib
 {
-    [Serializable]
-    public class Rotation:ISerializable
-    {       
+    public class Rotation
+    {
+        [JsonProperty("roll")]
         public double Roll { get; set; }
+        [JsonProperty("pitch")]
         public double Pitch { get; set; }
+        [JsonProperty("yaw")]
         public double Yaw { get; set; }       
 
         public double this[int index]
@@ -47,20 +50,6 @@ namespace RozumConnectionLib
             Roll = enumerable.ElementAt(0);
             Pitch = enumerable.ElementAt(1);
             Yaw = enumerable.ElementAt(2);
-        }
-
-        public Rotation(SerializationInfo info, StreamingContext context)
-        {
-            Roll = info.GetDouble("roll");
-            Pitch = info.GetDouble("pitch");
-            Yaw = info.GetDouble("yaw");            
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("roll", Roll);
-            info.AddValue("pitch", Pitch);
-            info.AddValue("yaw", Yaw);
         }
 
         public double[] ToArray() => new[] {Roll, Pitch, Yaw};
