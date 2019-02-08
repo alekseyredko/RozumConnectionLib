@@ -20,7 +20,8 @@ namespace RozumConnectionLib
             Name = info.GetString("name");
             Radius = info.GetDouble("radius");
             Point = (Point)info.GetValue("point", typeof(Point));
-            Rotation = (Rotation) info.GetValue("rotation", typeof(Rotation));           
+            Rotation = (Rotation) info.GetValue("rotation", typeof(Rotation));
+            Shape = (Shape)info.GetValue("shape", typeof(Shape));
         }
 
         public string Name { get; set; }
@@ -34,12 +35,15 @@ namespace RozumConnectionLib
         
         public Rotation Rotation { get; set; }
 
+        public Shape Shape { get; set; }
+
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("name", Name);
             info.AddValue("point", Point);
             info.AddValue("rotation", Rotation);
             info.AddValue("radius", Radius);
+            info.AddValue("shape", Radius);
         }
 
         public override string ToString()
