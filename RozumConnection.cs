@@ -13,7 +13,7 @@ namespace RozumConnectionLib
     class RozumConnection
     {               
         public string URL { get; set; }
-        private readonly HttpClient client = new HttpClient();
+        private static readonly HttpClient client = new HttpClient();
 
         public RozumConnection()
         {            
