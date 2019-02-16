@@ -12,23 +12,13 @@ namespace RozumConnectionLib
     {
         private RozumConnection _connection;
 
-        private int _port;
-
-        private string _url;
-
         public RealRobot(string ip, int port = 8080)
         {
             Status = RobotStatusMotion.ERROR;
             InitValues();
             Port = port;
+            URL = ip;
             InitConnection(ip, port);
-        }
-
-        public RealRobot(string ip)
-        {
-            Status = RobotStatusMotion.ERROR;
-            InitValues();
-            InitConnection(ip, Port);
         }
 
         public RealRobot()
@@ -43,26 +33,9 @@ namespace RozumConnectionLib
         public double JointMoveStep { get; set; }
         public int Speed { get; set; }
 
-        public string URL
-        {
-            get => _url;
-            set
-            {
-                _url = value;
-                InitConnection(value, Port);
-            }
-        }
+        public string URL { get; set; }
 
-        public int Port
-        {
-            get => _port;
-            set
-            {
-                _port = value;
-                InitConnection(URL, value);
-            }
-        }
-
+        public int Port { get; set; }
 
         public MotorStatus MotorStatus { get; protected set; }
 
