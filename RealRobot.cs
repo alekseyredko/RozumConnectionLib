@@ -27,11 +27,7 @@ namespace RozumConnectionLib
             IsConnected = false;
 
             InitValues();
-        }
-
-        public double TcpMoveStep { get; set; }
-        public double JointMoveStep { get; set; }
-        public int Speed { get; set; }
+        }       
 
         public string URL { get; set; }
 
