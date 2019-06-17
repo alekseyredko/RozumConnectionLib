@@ -8,11 +8,19 @@ using Newtonsoft.Json;
 
 namespace RozumConnectionLib
 {
-    public class RealRobot : Robot
+    public class RealRobot
     {
+        public string ID { get; set; }
+        public Gripper Tool { get; set; }
+        public bool[] InputPorts { get; set; }
+        public bool[] OutputPorts { get; set; }
+        public Pose JointAngles { get; set; }
+        public Position Position { get; set; }
+        public Position BasePosition { get; set; }            
+
         private RozumConnection _connection;
 
-        public RealRobot(string ip, int port = 8080)
+        public RealRobot(string ip, int port = 8081)
         {
             Status = RobotStatusMotion.ERROR;
             InitValues();
@@ -217,7 +225,7 @@ namespace RozumConnectionLib
             return "OK";
         }
 
-        public override async Task<string> GetPoseAsync()
+        public async Task<string> GetPoseAsync()
         {
             var response = await _connection.GetPose();
 
@@ -228,7 +236,7 @@ namespace RozumConnectionLib
             return "OK";
         }
 
-        public override async Task<string> GetPositionAsync()
+        public async Task<string> GetPositionAsync()
         {
             var response = await _connection.GetPosition();
 
