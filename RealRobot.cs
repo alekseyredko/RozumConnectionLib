@@ -69,11 +69,7 @@ namespace RozumConnectionLib
             if (IPAddress.TryParse(ip, out var iP))
             {
                 _connection = new RozumConnection($"http://{ip}:{port}/");
-                if (_connection.GetStatusMotionStr().Result.StartsWith("Robot"))
-                {
-                    IsConnected = false;
-                }
-                else IsConnected = true;
+                IsConnected = true;
             }
             else
             {
