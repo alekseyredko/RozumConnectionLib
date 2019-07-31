@@ -20,20 +20,16 @@ namespace RozumConnectionLib
 
         private RozumConnection _connection;
 
-        public RealRobot(string ip, int port = 8081)
+        public RealRobot(string ip, int port = 8081): this()
         {
-            Status = RobotStatusMotion.ERROR;
-            InitValues();
             Port = port;
             URL = ip;
-            InitConnection(ip, port);
         }
 
         public RealRobot()
         {
             Status = RobotStatusMotion.ERROR;
             IsConnected = false;
-
             InitValues();
         }       
 
@@ -64,17 +60,52 @@ namespace RozumConnectionLib
             MotorStatus = new MotorStatus();
         }
 
-        private void InitConnection(string ip, int port)
+        public async Task<bool> InitConnectionAsync(string ip, int port)
         {
+            URL = ip;
+            Port = port;
+
             if (IPAddress.TryParse(ip, out var iP))
             {
                 _connection = new RozumConnection($"http://{ip}:{port}/");
-                IsConnected = true;
+
+                if (await _connection.GetStatusMotionStr() == "OK")
+                {
+                    IsConnected = true;
+                    return true;
+                }
+
+                IsConnected = false;
+                return false;
             }
             else
             {
                 _connection = new RozumConnection($"http://{ip}:{port}/");
                 IsConnected = false;
+                return false;
+            }
+        }
+
+        public async Task<bool> InitConnectionAsync()
+        {
+            if (IPAddress.TryParse(URL, out var iP))
+            {
+                _connection = new RozumConnection($"http://{URL}:{Port}/");
+
+                if (await _connection.GetStatusMotionStr() == "OK")
+                {
+                    IsConnected = true;
+                    return true;
+                }
+
+                IsConnected = false;
+                return false;
+            }
+            else
+            {
+                _connection = new RozumConnection($"http://{URL}:{Port}/");
+                IsConnected = false;
+                return false;
             }
         }
 
