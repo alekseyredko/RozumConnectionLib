@@ -69,7 +69,7 @@ namespace RozumConnectionLib
             {
                 _connection = new RozumConnection($"http://{ip}:{port}/");
 
-                if (await _connection.GetStatusMotionStr() == "OK")
+                if (await GetStatusMotionAsync() != "Robot does not respond")
                 {
                     IsConnected = true;
                     return true;
@@ -92,7 +92,7 @@ namespace RozumConnectionLib
             {
                 _connection = new RozumConnection($"http://{URL}:{Port}/");
 
-                if (await _connection.GetStatusMotionStr() == "OK")
+                if (await GetStatusMotionAsync() != "Robot does not respond")
                 {
                     IsConnected = true;
                     return true;
