@@ -203,6 +203,8 @@ namespace RozumConnectionLib
             }           
         }
 
+
+        //TODO: Использовать либо speed, либо набор других параметров
         public async Task<HttpResponseMessage> PutPosition(Position position, int value, MotionType type, float maxVelocity)
         {
             try
