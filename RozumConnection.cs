@@ -191,7 +191,7 @@ namespace RozumConnectionLib
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(pos),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"position?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}&tcp_max_velocity={maxVelocity}", httpContent);
+                return await client.PutAsync(URL + $"position?speed={value}&motion_type={(type == MotionType.JOINT? "JOINT": "LINEAR")}", httpContent);
             }
             catch (IndexOutOfRangeException)
             {
@@ -210,7 +210,7 @@ namespace RozumConnectionLib
                 var httpContent = new StringContent(
                     JsonConvert.SerializeObject(position),
                     Encoding.UTF8, "application/json");
-                return await client.PutAsync(URL + $"position?speed={value}&mode={(type == MotionType.JOINT? "JOINT": "LINEAR")}&tcp_max_velocity={maxVelocity}", httpContent);
+                return await client.PutAsync(URL + $"position?speed={value}&motion_type={(type == MotionType.JOINT? "JOINT": "LINEAR")}", httpContent);
             }
             catch (IndexOutOfRangeException)
             {
