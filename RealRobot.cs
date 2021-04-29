@@ -30,6 +30,7 @@ namespace RozumConnectionLib
         {
             Status = RobotStatusMotion.ERROR;
             IsConnected = false;
+            _connection = new RozumConnection();
             InitValues();
         }       
 
@@ -57,7 +58,7 @@ namespace RozumConnectionLib
             JointAngles = new Pose();
             Position = new Position();
             BasePosition = new Position();
-            MotorStatus = new MotorStatus();
+            MotorStatus = new MotorStatus();            
         }
 
         public async Task<bool> InitConnectionAsync(string ip, int port)
